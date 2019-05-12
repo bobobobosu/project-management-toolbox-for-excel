@@ -5,12 +5,12 @@ Private Sub ttt()
     parallelKey = 5000
     macroName = "test"
     'Save a copy of the Excel workbook
-    threadFileName = ActiveWorkbook.path & "\" & parallelKey & "_" & thread & ".xlsb"
-    'threadFileName = ActiveWorkbook.Path & "\" & "t.xlsb"
-    'threadFileName = ActiveWorkbook.Path & "\" & CStr(thread) & ".xlsb"
-    threadFileName = ActiveWorkbook.path & "\" & "hh.xlsb"
+    threadFileName = ActiveWorkbookpath & "\" & parallelKey & "_" & thread & ".xlsb"
+    'threadFileName = ActiveWorkbookpath & "\" & "t.xlsb"
+    'threadFileName = ActiveWorkbookpath & "\" & CStr(thread) & ".xlsb"
+    threadFileName = ActiveWorkbookpath & "\" & "hh.xlsb"
     'Call ActiveWorkbook.SaveCopyAs(threadFileName)
-    openedXls = ActiveWorkbook.path & "\" & CStr(thread) & ".xlsb"
+    openedXls = ActiveWorkbookpath & "\" & CStr(thread) & ".xlsb"
     openedXls = threadFileName
     'Save the VBscript
     s = "Set objExcel = GetObject(""" & openedXls & """):"
@@ -46,7 +46,7 @@ Private Sub ttt()
 '    s = s & "Loop" & vbCrLf
 '    s = s & "Set oXL = Nothing"
     'Save the VBscript file
-    sFileName = ActiveWorkbook.path & "\" & parallelKey & "_" & thread & ".vbs"
+    sFileName = ActiveWorkbookpath & "\" & parallelKey & "_" & thread & ".vbs"
     Open sFileName For Output As #1
     Print #1, s
     Close #1

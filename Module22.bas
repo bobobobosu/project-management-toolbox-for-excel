@@ -1,8 +1,8 @@
 Attribute VB_Name = "Module22"
 Option Explicit
 
-Function GetCoordinates(Address As String) As String
-    Address = InParens(Address)
+Function GetCoordinates(address As String) As String
+    address = InParens(address)
     '-----------------------------------------------------------------------------------------------------
     'This function returns the latitude and longitude of a given address using the Google Geocoding API.
     'The function uses the "simplest" form of Google Geocoding API (sending only the address parameter),
@@ -39,7 +39,7 @@ Function GetCoordinates(Address As String) As String
     '- Sensor: Indicates whether your application used a sensor to determine the user's location.
     'This parameter is no longer required.
     Request.Open "GET", "http://maps.googleapis.com/maps/api/geocode/xml?" _
-    & "&address=" & Address & "&sensor=false", False
+    & "&address=" & address & "&sensor=false", False
             
     'Send the request to the Google server.
     Request.send
@@ -97,12 +97,12 @@ End Function
 'the latitude and the longitude correspondingly of a given address.
 '--------------------------------------------------------------------------
 
-Function GetLatidue(Address As String) As Double
+Function GetLatidue(address As String) As Double
 
     Dim Coordinates As String
     
     'Get the coordinates for the given address.
-    Coordinates = GetCoordinates(Address)
+    Coordinates = GetCoordinates(address)
     
     'Return the latitude as number (double).
     If Coordinates <> "" Then
@@ -112,12 +112,12 @@ Function GetLatidue(Address As String) As Double
 
 End Function
 
-Function GetLongitude(Address As String) As Double
+Function GetLongitude(address As String) As Double
 
     Dim Coordinates As String
     
     'Get the coordinates for the given address.
-    Coordinates = GetCoordinates(Address)
+    Coordinates = GetCoordinates(address)
     
     'Return the longitude as number (double).
     If Coordinates <> "" Then
@@ -138,8 +138,3 @@ Function InParens(s As String) As String
         End If
     End If
 End Function
-
-
-Sub ggggggggg()
-    Debug.Print InParens("gggg[werv]ggggrevwg")
-End Sub

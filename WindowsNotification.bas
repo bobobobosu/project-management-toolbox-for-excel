@@ -2,27 +2,27 @@ Attribute VB_Name = "WindowsNotification"
 '***** Paste this code into your standard Module *****
 Option Explicit
 #If VBA7 Then
-    Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
+    Declare PtrSafe Function SetForegroundWindow Lib "User32" (ByVal hwnd As LongPtr) As Long
     Declare PtrSafe Function Shell_NotifyIcon Lib "shell32.dll" Alias "Shell_NotifyIconA" (ByVal dwMessage As Long, lpData As NOTIFYICONDATA) As LongPtr
-    Declare PtrSafe Function CallWindowProc Lib "user32" Alias "CallWindowProcA" (ByVal lpPrevWndFunc As LongPtr, ByVal hWnd As LongPtr, ByVal Msg As Long, ByVal wParam As LongPtr, ByVal lParam As LongPtr) As LongPtr
+    Declare PtrSafe Function CallWindowProc Lib "User32" Alias "CallWindowProcA" (ByVal lpPrevWndFunc As LongPtr, ByVal hwnd As LongPtr, ByVal Msg As Long, ByVal wParam As LongPtr, ByVal lParam As LongPtr) As LongPtr
     #If Win64 Then
         'Declare PtrSafe Function SetWindowLongPtr Lib "user32" Alias "SetWindowLongPtrA" (ByVal hwnd As LongPtr, ByVal nIndex As Long, ByVal dwNewLong As LongPtr) As LongPtr
     #Else
-        Declare PtrSafe Function SetWindowLongPtr Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As LongPtr, ByVal nIndex As Long, ByVal dwNewLong As LongPtr) As LongPtr
+        Declare PtrSafe Function SetWindowLongPtr Lib "User32" Alias "SetWindowLongA" (ByVal hwnd As LongPtr, ByVal nIndex As Long, ByVal dwNewLong As LongPtr) As LongPtr
     #End If
-    Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
+    Declare PtrSafe Function FindWindow Lib "User32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
     Declare PtrSafe Function ExtractIcon Lib "shell32.dll" Alias "ExtractIconA" (ByVal hInst As LongPtr, ByVal lpszExeFileName As String, ByVal nIconIndex As Long) As LongPtr
-    Declare PtrSafe Function GetForegroundWindow Lib "user32" () As LongPtr
+    Declare PtrSafe Function GetForegroundWindow Lib "User32" () As LongPtr
     Private FHandle As LongPtr
     Private WndProc As LongPtr
 #Else
-    Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long
+    Declare Function SetForegroundWindow Lib "User32" (ByVal hwnd As Long) As Long
     Declare Function Shell_NotifyIcon Lib "shell32.dll" Alias "Shell_NotifyIconA" (ByVal dwMessage As Long, lpData As NOTIFYICONDATA) As Long
-    Declare Function CallWindowProc Lib "user32" Alias "CallWindowProcA" (ByVal lpPrevWndFunc As Long, ByVal hWnd As Long, ByVal Msg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
-    Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
-    Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+    Declare Function CallWindowProc Lib "User32" Alias "CallWindowProcA" (ByVal lpPrevWndFunc As Long, ByVal hwnd As Long, ByVal Msg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+    Declare Function SetWindowLong Lib "User32" Alias "SetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+    Declare Function FindWindow Lib "User32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
     Declare Function ExtractIcon Lib "shell32.dll" Alias "ExtractIconA" (ByVal hInst As Long, ByVal lpszExeFileName As String, ByVal nIconIndex As Long) As Long
-    Declare Function GetForegroundWindow Lib "user32" () As Long
+    Declare Function GetForegroundWindow Lib "User32" () As Long
     Private FHandle As Long
     Private WndProc As Long
 #End If
@@ -75,7 +75,7 @@ End Type
 #If VBA7 Then
     Type NOTIFYICONDATA
        cbSize As Long
-       hWnd As LongPtr
+       hwnd As LongPtr
        uID As Long
        uFlags As Long
        uCallbackMessage As Long
@@ -92,7 +92,7 @@ End Type
 #Else
     Type NOTIFYICONDATA
        cbSize As Long
-       hWnd As Long
+       hwnd As Long
        uID As Long
        uFlags As Long
        uCallbackMessage As Long
@@ -153,7 +153,7 @@ End Sub
  
     Public Sub AddIconToTray(MeHwnd As LongPtr, MeIcon As Long, MeIconHandle As LongPtr, Tip As String)
         With nfIconData
-          .hWnd = MeHwnd
+          .hwnd = MeHwnd
           .uID = MeIcon
           .uFlags = NIF_MESSAGE Or NIF_ICON Or NIF_TIP Or NIF_GUID
           .uCallbackMessage = WM_RBUTTONUP
@@ -171,7 +171,7 @@ End Sub
         Dim hwnd2 As LongPtr
         wstate = Application.WindowState
         hwnd2 = GetForegroundWindow()   'find the current window
-        'AppActivate (ThisWorkbook2.Name) 'flash your existing workbook
+        'AppActivate (ThisWorkbook.Name) 'flash your existing workbook
         ufDone.Show 1                   'so the notification tray shows
         Application.WindowState = wstate
         SetForegroundWindow (hwnd2)     'then, bring the original window back to the front
@@ -207,7 +207,7 @@ End Sub
     
     Public Sub AddIconToTray(MeHwnd As Long, MeIcon As Long, MeIconHandle As Long, Tip As String)
         With nfIconData
-          .hWnd = MeHwnd
+          .hwnd = MeHwnd
           .uID = MeIcon
           .uFlags = NIF_MESSAGE Or NIF_ICON Or NIF_TIP Or NIF_GUID
           .uCallbackMessage = WM_RBUTTONUP
@@ -224,21 +224,9 @@ End Sub
         Dim hwnd2 As Long
         wstate = Application.WindowState
         hwnd2 = GetForegroundWindow()   'find the current window
-        'AppActivate (ThisWorkbook2.Name) 'flash your existing workbook
+        'AppActivate (ThisWorkbook.Name) 'flash your existing workbook
         ufDone.Show 1                   'so the notification tray shows
         Application.WindowState = wstate
         SetForegroundWindow (hwnd2)     'then, bring the original window back to the front
     End Sub
 #End If
- 
-Public Sub BalloonPopUp_1()
-    With nfIconData
-        .dwInfoFlags = vbInformation
-        .uFlags = NIF_INFO
-        .szInfoTitle = ActiveWorkbook.Name & vbNullChar
-        .szInfo = myMessage '"Your Macro Has Finished." & vbNullChar
-    End With
-   
-    Shell_NotifyIcon NIM_MODIFY, nfIconData
-End Sub
-'********************************************

@@ -9,14 +9,14 @@ Public Sub ExportVisualBasicCode()
     Const Padding = 24
     
     Dim VBComponent As Object
-    Dim count As Integer
+    Dim Count As Integer
     Dim path As String
     Dim directory As String
     Dim extension As String
     Dim fso As New FileSystemObject
     
     directory = ActiveWorkbook.path & "\VisualBasic"
-    count = 0
+    Count = 0
     
     If Not fso.FolderExists(directory) Then
         Call fso.CreateFolder(directory)
@@ -39,19 +39,19 @@ Public Sub ExportVisualBasicCode()
         On Error Resume Next
         err.Clear
         
-        path = directory & "\" & VBComponent.Name & extension
+        path = directory & "\" & VBComponent.name & extension
         Call VBComponent.Export(path)
         
         If err.Number <> 0 Then
-            Call MsgBox("Failed to export " & VBComponent.Name & " to " & path, vbCritical)
+            Call MsgBox("Failed to export " & VBComponent.name & " to " & path, vbCritical)
         Else
-            count = count + 1
-            Debug.Print "Exported " & Left$(VBComponent.Name & ":" & Space(Padding), Padding) & path
+            Count = Count + 1
+            Debug.Print "Exported " & Left$(VBComponent.name & ":" & Space(Padding), Padding) & path
         End If
 
         On Error GoTo 0
     Next
     
-    Application.StatusBar = "Successfully exported " & CStr(count) & " VBA files to " & directory
+    Application.StatusBar = "Successfully exported " & CStr(Count) & " VBA files to " & directory
     Application.OnTime Now + TimeSerial(0, 0, 10), "ClearStatusBar"
 End Sub

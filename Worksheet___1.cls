@@ -7,6 +7,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-Private Sub Worksheet_SelectionChange(ByVal target As Range)
+Private Sub Worksheet_SelectionChange(ByVal target As range)
 
 End Sub

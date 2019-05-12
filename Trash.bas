@@ -1,33 +1,30 @@
 Attribute VB_Name = "Trash"
-Sub wtrszhfsydg()
-    Dim gggggg As Range
-    Set gggggg = Range("D6:D14")
-    Dim hhh(1 To 4, 1 To 1) As Variant
-    hhh(1, 1) = "=1"
-     hhh(2, 1) = "=1"
-      hhh(3, 1) = "=4"
-       hhh(4, 1) = "=1"
-        gggggg.Formula = hhh
+Function TableArrayFormula()
+    TableArrayFormula = returnoriginal(range("Table13[Column2]"))
+End Function
+Function erwwgsfd(v As Variant)
+    erwwgsfd = vv
+End Function
+Sub PasteNonBlank()
+    
+    For i = 1 To Selection.Cells.Count
+        If Selection.Cells(i).Value2 <> vbNullString Then
+            range("表格2[起始百分比]").Cells(i) = Selection.Cells(i).Value2
+        End If
+        
+    Next
 End Sub
-Sub Array2Range()
-   Dim directory(1 To 10, 1 To 2) As Variant
-   Dim rng As Range, i As Long, j As Long
 
-   For i = 1 To 2
-      For j = 1 To 10
-         directory(j, i) = "=Now()"
-         
-      Next j
-   Next i
-
-   Set rng = Range("X1:Y10")
-
-   rng.FormulaArray = directory
-
+Sub ConvertFormulaArray()
+    For Each cell In Selection
+        cell.FormulaArray = cell.formula
+    Next
 End Sub
-Sub bytg()
-MacroFinished ("Hello")
-End Sub
-Sub gg()
-MsgBox ThisWorkbook2.Name
+
+Sub deleteFormula()
+    For Each cell In Selection
+        If cell.HasFormula Then
+            cell.formula = ""
+        End If
+    Next
 End Sub

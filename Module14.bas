@@ -9,7 +9,7 @@ Sub ScrollBar1_Change()
         cell.Value = SB.Value / 100
     Next cell
     
-    Range(Evaluate("INDIRECT(""$B$4"")")).Calculate
+    range(Evaluate("INDIRECT(""$B$4"")")).Calculate
     
 End Sub
 
@@ -52,8 +52,8 @@ Sub ScrollBar5_Change()
 
    Selection(1).Value = sum * SB.Value / 100
    
-   For i = 2 To Selection.count
-    Selection(i).Value = sum * (1 - SB.Value / 100) * (1 / (Selection.count - 1))
+   For i = 2 To Selection.Count
+    Selection(i).Value = sum * (1 - SB.Value / 100) * (1 / (Selection.Count - 1))
    Next i
    Call updateScrollbar5
 End Sub
@@ -61,7 +61,7 @@ End Sub
 
 Sub updateScrollbar5()
     Set SB = ActiveSheet.Shapes("Scroll Bar 5").ControlFormat
-    If InRange(Selection, Range("表格2[預計耗時]")) Then
+    If InRange(Selection, range("表格2[預計耗時]")) Then
         
         Dim sum As Double
         sum = 0
@@ -74,7 +74,7 @@ Sub updateScrollbar5()
     End If
 End Sub
 
-Function InRange(Range1 As Range, Range2 As Range) As Boolean
+Function InRange(Range1 As range, Range2 As range) As Boolean
     ' returns True if Range1 is within Range2
     InRange = Not (Application.Intersect(Range1, Range2) Is Nothing)
 End Function

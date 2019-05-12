@@ -8,10 +8,10 @@ Sub AutoUpdate_Click()
 End Sub
 
 Private Sub AutoCalculate()
-    If (Range("A1").Value) = True Then
-        Range(Evaluate("INDIRECT(""$N$2"")")).Calculate
+    If (range("A1").Value) = True Then
+        range(Evaluate("INDIRECT(""$N$2"")")).Calculate
         'Call CreateCalendar
-        If Range("ам╤у!K2").Value = 1 Then
+        If range("ам╤у!K2").Value = 1 Then
             
             Application.OnTime Now + TimeValue("00:01:00"), "AutoCalculate"
         End If

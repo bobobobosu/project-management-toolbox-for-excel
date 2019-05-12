@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Private cThreads As Long
 Private parallelKey As String
 'Constructor
-Private Sub class_initialize()
+Private Sub Class_Initialize()
     cThreads = 4
 End Sub
 'Destructor
@@ -39,21 +39,24 @@ Function ParallelFor(macroName As String) As String
     'Create For Threads
     
     'Filter Ranges to Calculate
-    Dim r As Range
-    Dim calList As Range
+    Dim r As range
+    Dim calList As range
     Dim mseqFrom As Long
     Dim mseqTo As Long
     Set calList = getCalculationList()
-    Set r = Filterll(calList, 0, -1, (calList.Columns.count > 1 And calList.Areas.count = 1))
+    Set r = calList ' Filterll(calList, 0, -1, (calList.Columns.count > 1 And calList.Areas.count = 1))
     
-    If (r.Columns.count > 1 And r.Areas.count = 1) Then
+    Dim columnMode As Long
+    If (r.Columns.Count > 1) Then
         'Column Mode
         seqFrom = 1
-        seqTo = r.Columns.count
+        seqTo = r.Columns.Count
+        columnMode = 1
     Else
         'Cell Mode
         seqFrom = 1
-        seqTo = r.Cells.count
+        seqTo = r.Cells.Count
+        columnMode = 0
     End If
     
     
@@ -61,14 +64,15 @@ Function ParallelFor(macroName As String) As String
     
     
     For i = 1 To 12
-        Range("ам╤у!L" & CStr((1 + i))).Value2 = ""
+        range("ам╤у!L" & CStr((1 + i))).Value2 = ""
     Next i
     If cThreads < (seqTo - seqFrom + 1) Then
         For thread = 1 To cThreads
             mseqFrom = seqFrom + CLng(CDbl(seqTo - seqFrom) * (thread - 1) / cThreads)
             mseqTo = seqFrom + CLng(CDbl(seqTo - seqFrom) * thread / cThreads)
-            Set r = Filterll(calList, mseqFrom, mseqTo, (calList.Columns.count > 1 And calList.Areas.count = 1))
-            Range("ам╤у!L" & CStr((2 + thread))).Value2 = AddressEx(r)
+            f = AddressEx(calList)
+            Set r = Filterll(calList, mseqFrom, mseqTo, columnMode)
+            range("ам╤у!L" & CStr((2 + thread))).Value2 = AddressEx(r)
             ForThread macroName, thread, _
                 mseqFrom, _
                 mseqTo
@@ -77,8 +81,8 @@ Function ParallelFor(macroName As String) As String
         For thread = seqFrom To seqTo
             mseqFrom = thread
             mseqTo = thread
-            Set r = Filterll(calList, mseqFrom, mseqTo, (calList.Columns.count > 1 And calList.Areas.count = 1))
-            Range("ам╤у!L" & CStr((2 + thread))).Value2 = AddressEx(r)
+            Set r = Filterll(calList, mseqFrom, mseqTo, columnMode)
+            range("ам╤у!L" & CStr((2 + thread))).Value2 = AddressEx(r)
             ForThread macroName, thread, _
                 thread, _
                 thread
@@ -101,23 +105,23 @@ End Function
 Private Sub CreateSemaphores()
     Dim i As Long
     For i = 1 To cThreads
-        Call ActiveWorkbook.Names.Add("S" & parallelKey & "_" & i, "=0")
+        Call ActiveWorkbook.names.Add("S" & parallelKey & "_" & i, "=0")
     Next i
 End Sub
 Private Sub DropSemaphores()
     On Error Resume Next
     Dim i As Long
     For i = 1 To cThreads
-        Call ActiveWorkbook.Names("S" & parallelKey & "_" & i).Delete
+        Call ActiveWorkbook.names("S" & parallelKey & "_" & i).Delete
     Next i
 End Sub
 Private Function CountSemaphores()
-    Dim i As Long, c As Long
-    c = 0
+    Dim i As Long, C As Long
+    C = 0
     For i = 1 To cThreads
-        If CLng(Replace(ActiveWorkbook.Names("S" & parallelKey & "_" & i).Value, "=", "")) > 0 Then c = c + 1
+        If CLng(Replace(ActiveWorkbook.names("S" & parallelKey & "_" & i).Value, "=", "")) > 0 Then C = C + 1
     Next i
-    CountSemaphores = c
+    CountSemaphores = C
 End Function
 Private Sub ForThread(macroName As String, thread As Long, subSeqFrom As Long, subSeqTo As Long)
     Dim s As String, sFileName As String, wsh As Object, threadFileName As String
@@ -135,7 +139,7 @@ Private Sub ForThread(macroName As String, thread As Long, subSeqFrom As Long, s
 '    s = s & ".Application.Workbooks(1).Windows(1).Visible = False = xlMinimized:"
 '    s = s & ".Application.Workbooks.Open(""" & threadFileName & """):"
     s = s & ".Application.Run """ & thread & ".xlsb!" & macroName & """ , """ & _
-        ActiveWorkbook.Name & """," & _
+        ActiveWorkbook.name & """," & _
         subSeqFrom & "," & _
         subSeqTo & ":"
 '    s = s & ".Application.ActiveWorkbook.Close False:"
@@ -196,11 +200,11 @@ Sub ParallelAsyncInvoke(macroName As String, Optional arg1, Optional arg2, Optio
     AsyncThread macroName, args
 End Sub
 Private Sub CreateSemaphore()
-    Call ActiveWorkbook.Names.Add("I" & parallelKey & "I", "=0")
+    Call ActiveWorkbook.names.Add("I" & parallelKey & "I", "=0")
 End Sub
 Private Sub DropSemaphore()
     On Error Resume Next
-    Call ActiveWorkbook.Names("I" & parallelKey & "I").Delete
+    Call ActiveWorkbook.names("I" & parallelKey & "I").Delete
 End Sub
 Private Sub AsyncThread(macroName As String, args As String)
     Dim s As String, sFileName As String, wsh As Object, threadFileName As String
@@ -212,17 +216,17 @@ Private Sub AsyncThread(macroName As String, args As String)
     s = s & "With objExcel:"
     s = s & ".Application.Visible = False:"
     s = s & ".Workbooks.Open(""" & threadFileName & """):"
-    s = s & ".Application.Run """ & parallelKey & ".xls!" & macroName & """,""" & ActiveWorkbook.Name & """ " & args & ":"
+    s = s & ".Application.Run """ & parallelKey & ".xls!" & macroName & """,""" & ActiveWorkbook.name & """ " & args & ":"
     s = s & ".ActiveWorkbook.Close False:"
     s = s & ".Application.Quit:"
     s = s & "End With:"
     s = s & "Set oXL = GetObject(, ""Excel.Application""):"
     s = s & "On Error Resume Next" & vbCrLf
-    s = s & "oXL.Workbooks(""" & ActiveWorkbook.Name & """).Names(""I" & parallelKey & "I"").Value = 1" & vbCrLf
-    s = s & "Do Until CLng(Replace(oXL.Workbooks(""" & ActiveWorkbook.Name & """).Names(""I" & parallelKey & "I"").Value,""="","""")) = 1" & vbCrLf
+    s = s & "oXL.Workbooks(""" & ActiveWorkbook.name & """).Names(""I" & parallelKey & "I"").Value = 1" & vbCrLf
+    s = s & "Do Until CLng(Replace(oXL.Workbooks(""" & ActiveWorkbook.name & """).Names(""I" & parallelKey & "I"").Value,""="","""")) = 1" & vbCrLf
     s = s & "If Err.Number <> 0 Then Exit Do" & vbCrLf
     s = s & "WScript.Sleep(100)" & vbCrLf
-    s = s & "oXL.Workbooks(""" & ActiveWorkbook.Name & """).Names(""I" & parallelKey & "I"").Value = 1" & vbCrLf
+    s = s & "oXL.Workbooks(""" & ActiveWorkbook.name & """).Names(""I" & parallelKey & "I"").Value = 1" & vbCrLf
     s = s & "Loop" & vbCrLf
     s = s & "Set oXL = Nothing" & vbCrLf
     'Save the VBscript file
@@ -258,10 +262,10 @@ Public Function IsAsyncRunning() As Boolean
     End If
 End Function
 Private Function CountSemaphore()
-    Dim c As Long
-    c = 0
-    If CLng(Replace(ActiveWorkbook.Names("I" & parallelKey & "I").Value, "=", "")) > 0 Then c = c + 1
-    CountSemaphore = c
+    Dim C As Long
+    C = 0
+    If CLng(Replace(ActiveWorkbook.names("I" & parallelKey & "I").Value, "=", "")) > 0 Then C = C + 1
+    CountSemaphore = C
 End Function
 Private Function GetArg(val) As String
     If VarType(val) = vbString Then

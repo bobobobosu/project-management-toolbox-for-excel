@@ -1,11 +1,10 @@
 Attribute VB_Name = "Module8"
 'Public Const masterFileName  As String = "Z:\My Drive\_Storage\Backup\Documents\RAMDISK_loc\Documents\root\Data\TC.xlsb"
 Public Sub RecalculateSelection()
-
     On Error GoTo ErrorHandler
     If TypeName(Selection) = "Range" Then
         'Detect Calculation Settings
-        If Range("ам╤у!K2").Value = 1 Then
+        If range("ам╤у!K2").Value = 1 Then 'And Selection.Cells.Count < 50 Then
             'Application.OnTime Now, "BackgroundCalculate"
             Call BackgroundCalculate
         End If
@@ -23,59 +22,113 @@ Public Sub RecalculateActiveSheet()
 End Sub
 
 Public Function BackgroundCalculate()
-
-    'Default Calculation
-    Dim mselection As Range
-    Set mselection = Selection
-    If Range("ам╤у!P2") = 1 Then
-        mselection.Calculate
-    End If
-    Call llCalculate(mselection)
-
-    
+    Call llCalculate(Selection)
 End Function
+Function MySheet()
 
-Public Sub llCalculate(rIN As Range)
-    Dim r As Range
-    Set r = rIN
+   MySheet = range("A1").Worksheet.name
 
-
-    If Range("ам╤у!O2") = 0 Then Exit Sub
-    'Isolate firstRow
-    Call RefreshCal(r.Rows(1))
-    If rIN.Rows.count = 1 Then Exit Sub
-    Set r = getSubRange(2, 1, r.Rows.count, r.Columns.count, r)
-    'If no core
-    If Range("ам╤у!R2").Value2 = 0 Then
-        Call RefreshCal(r)
-        Exit Sub
+End Function
+Public Sub customCalculate()
+    Dim sel As range
+    Set sel = Selection
+    Dim table2 As range
+    Set table2 = range("╙М╝Ф2")
+    If sel.Worksheet.name = table2.Worksheet.name Then
+        If Application.Intersect(table2, sel).Count > 0 Then
+            Call CalculateRange1
+            Call CalculateTable2ByOrder
+            Call CalculateRange1
+        Else
+            Call llf(sel)
+        End If
+    Else
+        Call llf(sel)
     End If
-    'Detect ll Stat
-    inuse = WorksheetFunction.sum(Range("ам╤у!N" & "2:N" & CStr(2 + Range("ам╤у!R2").Value2)))
+End Sub
+Public Function llf(allr As Variant)
+    For Each cell1 In allr
+        Dim r As range
+        Set r = cell1
+        On Error Resume Next
+        If Not r.DirectPrecedents Is Nothing Then
+            For Each cell In r.DirectPrecedents
+                Dim r2 As range
+                Set r2 = cell
+                Set r2 = range(AddressEx(r2))
+                r2.Calculate
+                Application.OnTime Now, "llCalculate", r2
+            Next
+        End If
+        r.Calculate
+        Application.OnTime Now, "llCalculate", r
+    Next
+    llf = allr.Value2
+End Function
+Public Sub llCalculate(rIN As range)
+    If range("ам╤у!P2") = 1 Then rIN.Calculate
+    Dim r As range
+    Set r = rIN
+    If range("ам╤у!O2") = 0 Then Exit Sub
         
     'Run ll if idle
-    Dim filtered As Range
+    Dim filtered As range
     Set filtered = Filterll(r)
-    'Update List
-    If (Not (filtered Is Nothing)) And inuse = 0 Then
-        Range("ам╤у!L2").Value2 = AddressEx(filtered)
-        Set myr = getRange(Range("ам╤у!L2").Value2)
-        If filtered.count > 10 Then
-            'Disable Update
-            Range("ам╤у!S2") = 0
-            Call TestParallelForLoop(filtered)
+    If (Not (filtered Is Nothing)) Then
+'        If range("ам╤у!O2") = 1 Then
+'            'Isolate firstRow
+'            Call RefreshCal(r.Rows(1))
+'            If rIN.Rows.Count = 1 Then Exit Sub
+'            Set filtered = getSubRange(2, 1, r.Rows.Count, r.Columns.Count, r)
+'            If filtered.Count <= 10 Then
+'                If Not (filtered Is Nothing) Then
+'                    Call RefreshCal(filtered)
+'                End If
+'            Else
+'                If range("ам╤у!L2").Value2 <> vbNullString Then
+'                    range("ам╤у!L2").Value2 = range("ам╤у!L2").Value2 + "," + AddressEx(filtered)
+'                    range("ам╤у!L2").Value2 = RangeToColumnsAdd(range("ам╤у!L2").Value2)
+'                Else
+'                    range("ам╤у!L2").Value2 = RangeToColumnsAdd(AddressEx(filtered))
+'                End If
+'            End If
+'        ElseIf range("ам╤у!O2") = 3 Then
+        If range("ам╤у!O2") = 1 Then
+                If Not (filtered Is Nothing) Then
+                    Call RefreshCal(filtered)
+                End If
         Else
-            If Not (filtered Is Nothing) Then
-                Call RefreshCal(filtered)
-            End If
+                If range("ам╤у!L2").Value2 <> vbNullString Then
+                    range("ам╤у!L2").Value2 = range("ам╤у!L2").Value2 + "," + AddressEx(filtered)
+                    range("ам╤у!L2").Value2 = RangeToColumnsAdd(range("ам╤у!L2").Value2)
+                Else
+                    range("ам╤у!L2").Value2 = RangeToColumnsAdd(AddressEx(filtered))
+                End If
         End If
     End If
 End Sub
-Sub sertgfds()
-    Debug.Print getRange(Range("ам╤у!L2").Value2).Address
-End Sub
-Public Function getRange(rangeS As String, Optional FileName As String = "") As Range
-    Dim r As Range
+Function RangeToColumnsAdd(addressStr As Variant)
+    Dim r As range
+    Set r = Range2(addressStr)
+    Set r = UnionRange(r)
+    
+    Dim result As String
+    Dim thisCol As range
+    result = ""
+    For Each iarea In r.Areas
+        For Each icol In iarea.Columns
+            Set thisCol = icol
+            If result = vbNullString Then
+                result = AddressEx(thisCol)
+            Else
+                result = result + "," + AddressEx(thisCol)
+            End If
+        Next
+    Next
+    RangeToColumnsAdd = result
+End Function
+Public Function getRange(rangeS As String, Optional filename As String = "") As range
+    Dim r As range
     Dim remains As String
     remains = rangeS
     If Len(rangeS) > 254 Then
@@ -84,66 +137,67 @@ Public Function getRange(rangeS As String, Optional FileName As String = "") As 
             commaposition = InStr(remains, ",")
             ms = Left(remains, commaposition - 1)
     
-             If FileName = "" Then
+             If filename = "" Then
                 If (r Is Nothing) Then
-                    Set r = Range(ms)
+                    Set r = range(ms)
                 Else
-                    Set r = Union(r, Range(ms))
+                    Set r = Union(r, range(ms))
                 End If
             Else
                 If (r Is Nothing) Then
-                    Set r = GetObject(FileName).Application.Range(ms)
+                    Set r = GetObject(filename).Application.range(ms)
                 Else
-                    Set r = Union(r, GetObject(FileName).Application.Range(ms))
+                    Set r = Union(r, GetObject(filename).Application.range(ms))
                 End If
             End If
             remains = Right(remains, Len(remains) - commaposition)
         Loop
         'get Last One
-         If FileName = "" Then
+         If filename = "" Then
             If (r Is Nothing) Then
-                Set r = Range(remains)
+                Set r = range(remains)
             Else
-                Set r = Union(r, Range(remains))
+                Set r = Union(r, range(remains))
             End If
         Else
             If (r Is Nothing) Then
-                Set r = GetObject(FileName).Application.Range(remains)
+                Set r = GetObject(filename).Application.range(remains)
             Else
-                Set r = Union(r, GetObject(FileName).Application.Range(remains))
+                Set r = Union(r, GetObject(filename).Application.range(remains))
             End If
         End If
         Set getRange = r
     Else
-         If FileName = "" Then
-                Set r = Range(remains)
+         If filename = "" Then
+                Set r = range(remains)
         Else
-                Set r = GetObject(FileName).Application.Range(remains)
+                Set r = GetObject(filename).Application.range(remains)
         End If
     End If
     Set getRange = r
 End Function
 Public Sub TriggerSync()
-    Dim blankR As Range
-    Range("ам╤у!Q2").Value2 = AddressEx(Selection)
-    Range("ам╤у!L2").Value2 = ""
-    Set blankR = Range("A1").Resize(1, Range("ам╤у!R2").Value)
-    Range("ам╤у!S2") = 1
+    Dim blankR As range
+    range("ам╤у!Q2").Value2 = AddressEx(Selection)
+    range("ам╤у!L2").Value2 = ""
+    Set blankR = range("A1").Resize(1, range("ам╤у!R2").Value)
+    range("ам╤у!S2") = 1
     Call TestParallelForLoop(blankR)
 End Sub
-Public Function TestParallelForLoop(calList As Range)
+
+Public Function TestParallelForLoop(calList As range)
     Set calList = UnionRange(calList)
     'Clean ll Stat
     Set oXL = GetObject(masterFileName)
-    For i = 2 To (2 + Range("ам╤у!R2").Value - 1)
-            oXL.Application.Range("ам╤у!N" & i).Value = 1
+    For i = 2 To (2 + range("ам╤у!R2").Value - 1)
+            oXL.Application.range("ам╤у!N" & i).Value = 1
     Next i
-    oXL.Application.StatusBar = CStr(oXL.Application.Range("ам╤у!R2").Value2 - WorksheetFunction.sum(oXL.Application.Range("ам╤у!N" & "2:N" & CStr(2 + oXL.Application.Range("ам╤у!R2").Value2)))) & " in " & CStr(oXL.Application.Range("ам╤у!R2").Value2) & " Completed " & CStr(Now())
+    oXL.Application.StatusBar = CStr(oXL.Application.range("ам╤у!R2").Value2 - WorksheetFunction.sum(oXL.Application.range("ам╤у!N" & "2:N" & CStr(2 + oXL.Application.range("ам╤у!R2").Value2)))) & " in " & CStr(oXL.Application.range("ам╤у!R2").Value2) & " Completed " & CStr(Now())
     
     'Set ll
     Dim para As Parallel
     Set para = New Parallel
-    para.SetThreads Range("ам╤у!R2").Value
+    para.SetThreads range("ам╤у!R2").Value
 
     'Run ll
     Call para.ParallelFor("RunForVBA")
@@ -156,31 +210,31 @@ Sub RunForVBA(workbookName As String, seqFrom As Long, seqTo As Long)
     Set oXL = GetObject(masterFileName)
     'No Run
     If seqTo = 0 Then
-        Do Until oXL.Application.Range("ам╤у!N" & CStr(Replace(ActiveWorkbook.Name, ".xlsb", "") + 1)).Value = 0
+        Do Until oXL.Application.range("ам╤у!N" & CStr(Replace(ActiveWorkbook.name, ".xlsb", "") + 1)).Value = 0
             On Error Resume Next
-            oXL.Application.Range("ам╤у!N" & CStr(Replace(ActiveWorkbook.Name, ".xlsb", "") + 1)).Value = 0
+            oXL.Application.range("ам╤у!N" & CStr(Replace(ActiveWorkbook.name, ".xlsb", "") + 1)).Value = 0
         Loop
     End If
 
     
     'Update Tables
-    If oXL.Application.Range("ам╤у!S2") = 1 Then
+    If oXL.Application.range("ам╤у!S2") = 1 Then
         Call getTable
         oXL.Application.StatusBar = "Tables Updated"
     End If
     On Error Resume Next
     'Filter Ranges to Calculate
-    Dim r As Range
-    Dim calList As Range
-    Set calList = getCalculationList(CLng(Replace(ActiveWorkbook.Name, ".xlsb", "")))
+    Dim r As range
+    Dim calList As range
+    Set calList = getCalculationList(CLng(Replace(ActiveWorkbook.name, ".xlsb", "")))
      'Switch Sheet
-     If Application.ActiveSheet.Name <> calList.Worksheet.Name Then
-        Application.Workbooks(1).Sheets(calList.Worksheet.Name).Activate
+     If Application.ActiveSheet.name <> calList.Worksheet.name Then
+        Application.Workbooks(1).Sheets(calList.Worksheet.name).Activate
     End If
     
     
     Set r = calList 'Filterll(calList, seqFrom, seqTo, (calList.Columns.count > 1 And calList.Areas.count = 1))
-    Debug.Print calList.Address
+    Debug.Print calList.address
     'Calculate and Save
     If Not (r Is Nothing) And ((seqTo + seqFrom) <> 0) Then
         Call RefreshCal(r)
@@ -188,15 +242,22 @@ Sub RunForVBA(workbookName As String, seqFrom As Long, seqTo As Long)
     End If
     
     'Done
-    Do Until oXL.Application.Range("ам╤у!N" & CStr(Replace(ActiveWorkbook.Name, ".xlsb", "") + 1)).Value = 0
+    Do Until oXL.Application.range("ам╤у!N" & CStr(Replace(ActiveWorkbook.name, ".xlsb", "") + 1)).Value = 0
         On Error Resume Next
-        oXL.Application.Range("ам╤у!N" & CStr(Replace(ActiveWorkbook.Name, ".xlsb", "") + 1)).Value = 0
+        oXL.Application.range("ам╤у!N" & CStr(Replace(ActiveWorkbook.name, ".xlsb", "") + 1)).Value = 0
     Loop
     On Error Resume Next
-    oXL.Application.StatusBar = CStr(oXL.Application.Range("ам╤у!R2").Value2 - WorksheetFunction.sum(oXL.Application.Range("ам╤у!N" & "2:N" & CStr(2 + oXL.Application.Range("ам╤у!R2").Value2)))) & " in " & CStr(oXL.Application.Range("ам╤у!R2").Value2) & " Completed " & CStr(Now())
+    oXL.Application.StatusBar = CStr(oXL.Application.range("ам╤у!R2").Value2 - WorksheetFunction.sum(oXL.Application.range("ам╤у!N" & "2:N" & CStr(2 + oXL.Application.range("ам╤у!R2").Value2)))) & " in " & CStr(oXL.Application.range("ам╤у!R2").Value2) & " Completed " & CStr(Now())
 
 End Sub
+Function GetFilenameFromPath(ByVal strPath As String) As String
+' Returns the rightmost characters of a string upto but not including the rightmost '\'
+' e.g. 'c:\winnt\win.ini' returns 'win.ini'
 
+    If Right$(strPath, 1) <> "\" And Len(strPath) > 0 Then
+        GetFilenameFromPath = GetFilenameFromPath(Left$(strPath, Len(strPath) - 1)) + Right$(strPath, 1)
+    End If
+End Function
 Public Function AvalibleCoreNum()
     threadC = 12
     'Get Instances
@@ -204,15 +265,15 @@ Public Function AvalibleCoreNum()
     Set instances = GetExcelInstances()
     Dim instanceIndex As New Collection
     'For i = instances.count To 1 Step -1
-    For i = 1 To instances.count
+    For i = 1 To instances.Count
         For j = 1 To threadC
-            threadFileName = ActiveWorkbook.path & "\" & CStr(j) & ".xlsb"
-            If threadFileName = instances(i).ActiveWorkbook.FullName Then
+            threadFileName = ActiveWorkbookpath & "\" & CStr(j) & ".xlsb"
+            If GetFilenameFromPath(threadFileName) = GetFilenameFromPath(instances(i).ActiveWorkbook.FullName) Then
                 instanceIndex.Add i
             End If
         Next j
     Next i
-    AvalibleCoreNum = instanceIndex.count
+    AvalibleCoreNum = instanceIndex.Count
 End Function
 Public Sub SyncCores()
 threadC = 12
@@ -222,9 +283,9 @@ threadC = 12
     Dim instanceIndex As New Collection
 
     For j = 1 To threadC
-        For i = 1 To instances.count
-            threadFileName = ActiveWorkbook.path & "\" & CStr(j) & ".xlsb"
-            If threadFileName = instances(i).ActiveWorkbook.FullName Then
+        For i = 1 To instances.Count
+            threadFileName = ActiveWorkbookpath & "\" & CStr(j) & ".xlsb"
+            If GetFilenameFromPath(threadFileName) = GetFilenameFromPath(instances(i).ActiveWorkbook.FullName) Then
                 instanceIndex.Add i
                 Exit For
             End If
@@ -232,8 +293,8 @@ threadC = 12
     Next j
 
 'Quit Instances
-If instanceIndex.count > 0 Then
-    For instanceIndexS = 1 To instanceIndex.count
+If instanceIndex.Count > 0 Then
+    For instanceIndexS = 1 To instanceIndex.Count
             instances(instanceIndex.Item(instanceIndexS)).Application.DisplayAlerts = False
             instances(instanceIndex.Item(instanceIndexS)).Application.Workbooks(CStr(instanceIndexS) & ".xlsb").Close savechanges:=False
             instances(instanceIndex.Item(instanceIndexS)).Application.DisplayAlerts = True
@@ -246,19 +307,18 @@ End If
 'Save Master
 ActiveWorkbook.Save
 For thread = 1 To threadC
-    threadFileName = ActiveWorkbook.path & "\" & CStr(thread) & ".xlsb"
+    threadFileName = ActiveWorkbookpath & "\" & CStr(thread) & ".xlsb"
     If thread = 1 Then
         Application.DisplayAlerts = False
-        ActiveWorkbook.SaveCopyAs FileName:=threadFileName
+        ActiveWorkbook.SaveCopyAs filename:=threadFileName
         Application.DisplayAlerts = True
     Else
-        copythatfile ActiveWorkbook.path & "\" & CStr(1) & ".xlsb", threadFileName
+        copythatfile ActiveWorkbookpath & "\" & CStr(1) & ".xlsb", threadFileName
     End If
-    
 Next thread
 
 'Open Cores
-If instanceIndex.count > 0 Then
+If instanceIndex.Count > 0 Then
     'Reopen
     Call ReOpenCores
 End If
@@ -267,12 +327,28 @@ End If
 Application.StatusBar = "Sync Core Complete, Opening Cores" & " " & CStr(Now())
 End Sub
 
-Function IsWorkBookOpen(FileName As String)
+
+Sub SaveCores(numCores As Variant)
+    ActiveWorkbook.Save
+    For thread = 1 To numCores
+        threadFileName = ActiveWorkbookpath & "\" & CStr(thread) & ".xlsb"
+        If thread = 1 Then
+            Application.DisplayAlerts = False
+            ActiveWorkbook.SaveCopyAs filename:=threadFileName
+            Application.DisplayAlerts = True
+        Else
+            copythatfile ActiveWorkbookpath & "\" & CStr(1) & ".xlsb", threadFileName
+        End If
+    Next thread
+End Sub
+
+
+Function IsWorkBookOpen(filename As String)
     Dim ff As Long, ErrNo As Long
 
     On Error Resume Next
     ff = FreeFile()
-    Open FileName For Input Lock Read As #ff
+    Open filename For Input Lock Read As #ff
     Close ff
     ErrNo = err
     On Error GoTo 0
@@ -288,18 +364,18 @@ Sub ReOpenCores()
     'Save the bat
     s = "setlocal" & vbNewLine
     s = s & "cd /d %~dp0" & vbNewLine
-    For i = 1 To Range("ам╤у!R2").Value2
-        s = s & "start " & Chr(34) & "title" & Chr(34) & " " & Chr(34) & "C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE" & Chr(34) & " /X " & CStr(i) & ".xlsb" & vbNewLine
+    For i = 1 To range("ам╤у!R2").Value2
+        s = s & "start " & Chr(34) & "title" & Chr(34) & " " & Chr(34) & "C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE" & Chr(34) & " /X " & ActiveWorkbookpath & "\" & CStr(i) & ".xlsb" & vbNewLine
     Next i
 
     'Save the bat file
-    sFileName = ActiveWorkbook.path & "\" & "start" & ".bat"
+    sFileName = ActiveWorkbookpath & "\" & "start" & ".bat"
     Open sFileName For Output As #1
     Print #1, s
     Close #1
     Dim retVal
-    ChDir ActiveWorkbook.path
-    retVal = Shell(ActiveWorkbook.path & "\" & "start.bat")
+    ChDir ActiveWorkbookpath
+    retVal = Shell(ActiveWorkbookpath & "\" & "start.bat")
 End Sub
 
 
@@ -312,9 +388,9 @@ threadC = 12
     'For i = instances.count To 1 Step -1
 
     For j = 1 To threadC
-        For i = 1 To instances.count
-            threadFileName = ActiveWorkbook.path & "\" & CStr(j) & ".xlsb"
-            If threadFileName = instances(i).ActiveWorkbook.FullName Then
+        For i = 1 To instances.Count
+            threadFileName = ActiveWorkbookpath & "\" & CStr(j) & ".xlsb"
+            If GetFilenameFromPath(threadFileName) = GetFilenameFromPath(instances(i).ActiveWorkbook.FullName) Then
                 instanceIndex.Add i
                 Exit For
             End If
@@ -322,8 +398,8 @@ threadC = 12
     Next j
     
     'Quit Instances
-    If instanceIndex.count > 0 Then
-        For instanceIndexS = 1 To instanceIndex.count
+    If instanceIndex.Count > 0 Then
+        For instanceIndexS = 1 To instanceIndex.Count
                 instances(instanceIndex.Item(instanceIndexS)).Application.DisplayAlerts = False
                 instances(instanceIndex.Item(instanceIndexS)).Application.ActiveWorkbook.Close savechanges:=False
                 instances(instanceIndex.Item(instanceIndexS)).Application.DisplayAlerts = True
@@ -345,25 +421,40 @@ Public Function ExistsInCollection(col As Collection, key As Variant) As Boolean
 err:
     ExistsInCollection = False
 End Function
+
+
+Function HasVal(coll As Collection, strKey As String) As Boolean
+    For L = 1 To coll.Count
+        On Error GoTo err
+        If coll(L) = strKey Then
+            HasVal = True
+            Exit Function
+        End If
+    Next L
+err:
+    HasVal = False
+End Function
+
+
 Public Function copythatfile(source As Variant, destination As Variant)
     Dim xlobj As Object
     Set xlobj = CreateObject("Scripting.FileSystemObject")
     xlobj.CopyFile source, destination, True
     Set xlobj = Nothing
 End Function
-Public Function getCalculationList(Optional core As Long = 0) As Range
-    Dim returnR As Range
+Public Function getCalculationList(Optional core As Long = 0) As range
+    Dim returnR As range
     If core = 0 Then
-        Set returnR = getRange(GetObject(masterFileName).Application.Range("ам╤у!L2").Value2)
+        Set returnR = getRange(GetObject(masterFileName).Application.range("ам╤у!L2").Value2)
     Else
-        Set returnR = getRange(GetObject(masterFileName).Application.Range("ам╤у!L" & CStr(2 + core)).Value2)
+        Set returnR = getRange(GetObject(masterFileName).Application.range("ам╤у!L" & CStr(2 + core)).Value2)
     End If
     Set returnR = UnionRange(returnR)
     Set getCalculationList = returnR
 End Function
 
-Public Function UnionRange(r As Range) As Range
-    Dim returnRange As Range
+Public Function UnionRange(r As range) As range
+    Dim returnRange As range
     If Not (r Is Nothing) Then
         For Each cell In r.Areas
 '            For Each cell In sArea.Cells
@@ -379,60 +470,137 @@ Public Function UnionRange(r As Range) As Range
         Set UnionRange = returnRange
     End If
 End Function
-Sub TransferToCores(r As Range)
-    Dim mselection As Range
+Sub TransferToCores(r As range)
+    Dim mselection As range
     Dim threadFileName As String
     Dim mAvalibleCoreNum As Double
-    mAvalibleCoreNum = Range("ам╤у!R2").Value2
+    mAvalibleCoreNum = AvalibleCoreNum()
+    If mAvalibleCoreNum < 1 Then
+        Exit Sub
+    End If
     Set mselection = r
     For i = 1 To mAvalibleCoreNum
-        threadFileName = ActiveWorkbook.path & "\" & CStr(i) & ".xlsb"
+        threadFileName = ActiveWorkbookpath & "\" & CStr(i) & ".xlsb"
         Call InstanceSync(threadFileName, mselection)
         Application.StatusBar = "Synchronizing...  " & CStr(CDbl(i) * 100 / mAvalibleCoreNum) & "%"
     Next i
     Application.StatusBar = "Core Synchronized"
 End Sub
-Sub InstanceSync(threadFileName As String, r As Range)
-    Set oXL = GetObject(threadFileName)
-        For Each Item In r.Areas
-            Dim caledArray As Variant
-            caledArray = Item.Formula
-            
-            On Error Resume Next
-            If Item.Cells(1).HasArray Then
-                 oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula = caledArray
-                oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).FormulaArray = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula
+
+Sub InstanceSyncUpdateValue(syncaddress As Variant)
+    Set oXL = GetObject(ActiveWorkbook.path & "\" & "TC" & ".xlsb")
+    Set toSync = Range2(syncaddress)
+    For Each Item In toSync.Areas
+        Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).Value2 = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).Value2
+    Next
+End Sub
+Sub InstanceSyncUpdateFormula(syncaddress As Variant)
+    Set oXL = GetObject(ActiveWorkbook.path & "\" & "TC" & ".xlsb")
+    Set toSync = Range2(syncaddress)
+    For Each IAreas In toSync.Areas
+        Dim Item As range
+        Set Item = oXL.Application.Workbooks(1).Sheets(IAreas.Worksheet.name).range(IAreas.address)
+        
+        On Error Resume Next
+        If Item.HasFormula Then
+            If Item.HasArray Then
+                IAreas.formula = Item.formula
+                IAreas.FormulaArray = Item.formula
             Else
-                oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula = caledArray
+                IAreas.formula = Item.formula
             End If
+        Else
+            IAreas.formula = Item.formula
+        End If
+    Next
+End Sub
+
+
+
+Sub addInstanceSync(r As range)
+    If range("ам╤у!V2").Value2 = "[Refresh]" Then Exit Sub
+    If AddressEx(r) <> AddressEx(range("ам╤у!V2")) And Split(AddressEx(r), "!")(0) <> "ам╤у" Then
+        range("ам╤у!V2").Value2 = mergeRange(range("ам╤у!V2").Value2, r)
+    End If
+End Sub
+Sub InstanceSyncBackFormula(syncaddress As Variant)
+    Set oXL = GetObject(ActiveWorkbook.path & "\" & "TC" & ".xlsb")
+    Set toSync = Range2(syncaddress)
+    For Each Item In toSync.Areas
+        Dim IAreas As range
+        Set IAreas = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address)
+        
+        On Error Resume Next
+        If Item.HasFormula Then
+            If Item.HasArray Then
+                IAreas.formula = Item.formula
+                IAreas.FormulaArray = Item.formula
+            Else
+                IAreas.formula = Item.formula
+            End If
+        Else
+            IAreas.formula = Item.formula
+        End If
+    Next
+End Sub
+
+Sub InstanceSync(threadFileName As String, r As range)
+    Set oXL = GetObject(threadFileName)
+    For Each Item In r.Areas
+        Dim caledArray As Variant
+        caledArray = Item.formula
+        
+        On Error Resume Next
+        If Item.HasFormula Then
+            Dim toCheck As range
+            Set toCheck = Item
+            If Checkll(toCheck) Then
+                If Item.HasArray Then
+                     oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula = caledArray
+                    oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).FormulaArray = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula
+                Else
+                    oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula = caledArray
+                End If
+            End If
+        Else
+            oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula = caledArray
+        End If
 
     Next Item
 End Sub
-Sub InstanceSyncBack(threadFileName As String, r As Range)
+Sub InstanceSyncBack(threadFileName As String, r As range)
     Set oXL = GetObject(threadFileName)
-        For Each Item In r.Areas
-            Dim caledArray As Variant
-            caledArray = Item.Formula
-            
-            On Error Resume Next
-            'oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).range(Item.Address)(1) = 0
-            If Item.HasArray Then
-                Item.Formula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula
-                Item.FormulaArray = Item.Formula
-            Else
-                Item.Formula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula
+    For Each Item In r.Areas
+        Dim caledArray As Variant
+        caledArray = Item.formula
+        
+        On Error Resume Next
+        'oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).range(Item.Address)(1) = 0
+        If Item.HasFormula Then
+            Dim toCheck As range
+            Set toCheck = Item
+            If Checkll(toCheck) Then
+                If Item.HasArray Then
+                    Item.formula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula
+                    Item.FormulaArray = Item.formula
+                Else
+                    Item.formula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula
+                End If
             End If
+        Else
+            Item.formula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula
+        End If
     Next Item
 End Sub
-Sub SyncTable(r As Range)
-    Dim r As Range
-    Set r = Range(Range("ам╤у!J2").Value2)
+Sub SyncTable(r As range)
+    Dim r As range
+    Set r = range(range("ам╤у!J2").Value2)
     
-    For i = 1 To Range("ам╤у!R2").Value
-        threadFileName = ActiveWorkbook.path & "\" & CStr(i) & ".xlsb"
+    For i = 1 To range("ам╤у!R2").Value
+        threadFileName = ActiveWorkbookpath & "\" & CStr(i) & ".xlsb"
         On Error GoTo wtf
         Set oXL = GetObject(threadFileName)
-        oXL.Application.Workbooks(1).Sheets(r.Worksheet.Name).Range(AddressEx(r)).Formula = r.Formula
+        oXL.Application.Workbooks(1).Sheets(r.Worksheet.name).range(AddressEx(r)).formula = r.formula
         Set oXL = Nothing
         
 wtf:
@@ -443,18 +611,18 @@ End Sub
 
 Sub getTable()
     Set oXL = GetObject(masterFileName)
-    Dim toRefresh As Range
+    Dim toRefresh As range
     Set toRefresh = Nothing
     'CurrentSheet = oXL.Application.range(oXL.Application.range("ам╤у!Q2").Value2).Worksheet.Name
-    CurrentSheet = oXL.Application.ActiveSheet.Name
+    CurrentSheet = oXL.Application.ActiveSheet.name
     'Check Same Sheet
     For i = 2 To 100
-        If oXL.Application.Range("ам╤у!$Q$" & i).Value2 <> vbNullString Then
-            If (oXL.Application.Range(oXL.Application.Range("ам╤у!$Q$" & i).Value2).Worksheet.Name = CurrentSheet) Then
+        If oXL.Application.range("ам╤у!$Q$" & i).Value2 <> vbNullString Then
+            If (oXL.Application.range(oXL.Application.range("ам╤у!$Q$" & i).Value2).Worksheet.name = CurrentSheet) Then
                 If (toRefresh Is Nothing) Then
-                    Set toRefresh = Range(oXL.Application.Range("ам╤у!$Q$" & i).Value2)
+                    Set toRefresh = range(oXL.Application.range("ам╤у!$Q$" & i).Value2)
                 Else
-                    Set toRefresh = Union(toRefresh, Range(oXL.Application.Range("ам╤у!$Q$" & i).Value2))
+                    Set toRefresh = Union(toRefresh, range(oXL.Application.range("ам╤у!$Q$" & i).Value2))
                 End If
             End If
         End If
@@ -465,13 +633,13 @@ Sub getTable()
         For Each sArea In toRefresh.Areas
             For Each Item In sArea.Cells
                 On Error Resume Next
-                If oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).HasArray Then
-                    arrayformula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula
+                If oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).HasArray Then
+                    arrayformula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula
                     If Len(arrayformula) < 255 Then
-                        Item.FormulaArray = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula
+                        Item.FormulaArray = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula
                     End If
                 Else
-                    Item.Formula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula
+                    Item.formula = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula
                 End If
             Next Item
         Next sArea
@@ -479,21 +647,21 @@ Sub getTable()
 
         Set oXL = Nothing
 End Sub
-Public Function AddressEx(Range As Range, Optional blnBuildAddressForNamedRangeValue As Boolean = False) As String
+Public Function AddressEx(range As range, Optional blnBuildAddressForNamedRangeValue As Boolean = False) As String
                                          
     Const Seperator As String = ","
 
     Dim WorksheetName As String
     Dim TheAddress As String
     Dim Areas As Areas
-    Dim Area As Range
+    Dim Area As range
 
     'WorksheetName = "'" & Range.Worksheet.Name & "'"
-    WorksheetName = Range.Worksheet.Name
+    WorksheetName = range.Worksheet.name
 
-    For Each Area In Range.Areas
+    For Each Area In range.Areas
 '           ='Sheet 1'!$H$8:$H$15,'Sheet 1'!$C$12:$J$12
-        TheAddress = TheAddress & WorksheetName & "!" & Area.Address(External:=False) & Seperator
+        TheAddress = TheAddress & WorksheetName & "!" & Area.address(External:=False) & Seperator
 
     Next Area
 
@@ -506,27 +674,27 @@ Public Function AddressEx(Range As Range, Optional blnBuildAddressForNamedRangeV
 End Function
 
 
-Function subRange(r As Range, startPos As Long, endPos As Long) As Range
-    Set subRange = r.Parent.Range(r.Cells(startPos), r.Cells(endPos))
+Function subRange(r As range, startPos As Long, endPos As Long) As range
+    Set subRange = r.Parent.range(r.Cells(startPos), r.Cells(endPos))
 End Function
 
 
-Public Sub WaitForCompletion(startTime As Double)
+Public Sub WaitForCompletion(StartTime As Double)
 
-    If WorksheetFunction.sum(Range("ам╤у!N" & "2:N" & CStr(2 + Range("ам╤у!R2").Value2))) > 0 Then
-        Application.OnTime Now + TimeValue("00:00:01"), "'WaitForCompletion """ & startTime & """'"
+    If WorksheetFunction.sum(range("ам╤у!N" & "2:N" & CStr(2 + range("ам╤у!R2").Value2))) > 0 Then
+        Application.OnTime Now + TimeValue("00:00:01"), "'WaitForCompletion """ & StartTime & """'"
     Else
         Call returnToMaster
-        Application.StatusBar = "Completed in " & Format(CStr(Now() - startTime), "hh:mm:ss")
+        Application.StatusBar = "Completed in " & Format(CStr(Now() - StartTime), "hh:mm:ss")
     End If
 End Sub
 Public Sub returnToMaster()
     Dim threadFileName As String
-    Corenum = Range("ам╤у!R2").Value2
+    Corenum = range("ам╤у!R2").Value2
     For i = 1 To Corenum
-        If Range("ам╤у!L" & CStr((2 + i))).Value2 <> "" Then
-            threadFileName = ActiveWorkbook.path & "\" & CStr(i) & ".xlsb"
-            Call InstanceSyncBack(threadFileName, getRange(Range("ам╤у!L" & CStr((2 + i))).Value2))
+        If range("ам╤у!L" & CStr((2 + i))).Value2 <> "" Then
+            threadFileName = ActiveWorkbookpath & "\" & CStr(i) & ".xlsb"
+            Call InstanceSyncBack(threadFileName, getRange(range("ам╤у!L" & CStr((2 + i))).Value2))
             'Call TransferToCores(getRange(Range("ам╤у!L" & CStr((2 + i))).Value2))
             Application.StatusBar = "Retrieving...  " & CStr(CDbl(i) * 100 / CDbl(Corenum)) & "%"
         End If
@@ -534,198 +702,3 @@ Public Sub returnToMaster()
     Application.StatusBar = "Results Retrieved"
     
 End Sub
-
-
-Sub gtertrtweh()
-Dim g As Range
-Set g = Range("B7:B10")
-Debug.Print AddressEx(g)
-Set g = Range(AddressEx(g))
-Debug.Print AddressEx(g)
-
-End Sub
-Sub ertght()
-    Dim r As Range
-    Set r = Range("AQ20:AR25,AS20:AS24")
-    For Each Item In r.Areas
-        Set r = Union(r, Item)
-    Next Item
-    Dim B As Range
-    Set B = Range("AT20:AU25,AV20:AV24")
-    For Each Item In r.Areas
-        Set B = Union(B, Item)
-    Next Item
-    
-    Call RefreshCal(B)
-    Debug.Print B.Address
-
-End Sub
-
-Sub gqwertrefvg()
-    Dim we As Range
-    Set we = Range("F265:F268,F266:F277")
-    Set we = UnionRange(we)
-    Debug.Print we.Address
-End Sub
-Sub testvgg()
-    Dim calList As Range
-    Set calList = Range("Table56")
-    If (calList.Columns.count > 1 And calList.Areas.count = 1) Then
-        Call RunForVBA("TC.xlsb", 1, calList.Columns.count)
-    Else
-        Call RunForVBA("TC.xlsb", 1, calList.count)
-    End If
-    
-    
-End Sub
-Public Sub gg()
-thread = 6
-threadFileName = ActiveWorkbook.path & "\" & CStr(thread) & ".xlsb"
-    Set xlobj = GetObject(threadFileName)
-    xlobj.Application.ActiveWorkbook.Close savechanges:=False
-End Sub
-
-
-Sub hfdgsf()
-    Dim r As Range
-    Set r = Range("╩Ы╜х╕Т╜p!N16:M20")
-    MsgBox r.Worksheet.Name
-End Sub
-
-Public Sub ggergr()
-    getCalculationList().Calculate
-End Sub
-
-
-Public Sub ggggggg()
-    Dim returnR As Range
-    
-    threadFileName = ActiveWorkbook.path & "\" & "TC.xlsb"
-    Set oXL = GetObject(threadFileName)
-'
-'
-    Set r = Range("B10:B10")
-    Set g = Range("B8:B8")
-    'r.Copy
-    
-    oXL.Application.Workbooks(1).Sheets(r.Worksheet.Name).Range(r.Address).Value2 = r.Value2
-    oXL.Application.Workbooks(1).Sheets(r.Worksheet.Name).Range(r.Address).Formula = "=NOW()"  '.PasteSpecial Paste:=xlPasteValues
-    
-    
-    
-End Sub
-Sub fhwiuefhqporf()
-    Set g = Range("E13")
-    g.FormulaArray = g.Formula
-    MsgBox ""
-End Sub
-
-
-
-Sub gggggggg()
-    Dim gg As Range
-    Set gg = Range("A1:B10")
-    MsgBox gg.Columns.count
-    x = 0
-
-End Sub
-
-Sub gewrsthdg()
-    Dim returnR As Range
-    Set xlobj = GetObject(threadFileName)
-    Set returnR = xlobj.Application.Range("ам╤у!$Q$" & CStr(1))
-    MsgBox returnR.Address
-End Sub
-Sub gqerwg()
-Debug.Print ActiveWorkbook.path & "\" & "TC.xlsb"
-End Sub
-Sub etsghd()
-    Debug.Print Application.ActiveSheet.Name
-End Sub
-
-'Public Sub SyncCores()
-'threadC = 12
-'    'Get Instances
-'    Dim instances As Collection
-'    Set instances = GetExcelInstances()
-'    Dim instanceIndex As New Collection
-'    'For i = instances.count To 1 Step -1
-'
-'    For j = 1 To threadC
-'        For i = 1 To instances.count
-'            threadFileName = ActiveWorkbook.Path & "\" & CStr(j) & ".xlsb"
-'            If threadFileName = instances(i).ActiveWorkbook.FullName Then
-'                instanceIndex.Add i
-'                Exit For
-'            End If
-'        Next i
-'    Next j
-'
-''Quit Instances
-'If instanceIndex.count > 0 Then
-'    For instanceIndexS = 1 To instanceIndex.count
-''            threadFileName = ActiveWorkbook.Path & "\b" & CStr(instanceIndexS) & ".xlsb"
-''            instances(instanceIndex.Item(instanceIndexS)).Application.Workbooks.Open (threadFileName)
-'            instances(instanceIndex.Item(instanceIndexS)).Application.DisplayAlerts = False
-'
-'            instances(instanceIndex.Item(instanceIndexS)).Application.Workbooks(CStr(instanceIndexS) & ".xlsb").Close savechanges:=False
-'            instances(instanceIndex.Item(instanceIndexS)).Application.DisplayAlerts = True
-'            instances(instanceIndex.Item(instanceIndexS)).Application.Quit
-'            'instances(instanceIndex.Item(instanceIndexS)) = Nothing
-'
-'    Next instanceIndexS
-'    'Update Statusbar
-'    Application.StatusBar = "Cores Closed" & " " & CStr(Now())
-'End If
-'
-''Save Master
-'ActiveWorkbook.Save
-'For thread = 1 To threadC
-'    threadFileName = ActiveWorkbook.Path & "\" & CStr(thread) & ".xlsb"
-'    If thread = 1 Then
-'        Application.DisplayAlerts = False
-'        ActiveWorkbook.SaveCopyAs FileName:=threadFileName
-'        Application.DisplayAlerts = True
-'    Else
-'        copythatfile ActiveWorkbook.Path & "\" & CStr(1) & ".xlsb", threadFileName
-'    End If
-'
-'Next thread
-'
-''Open Cores
-'If instanceIndex.count > 0 Then
-'
-''For i = 1 To instanceIndex.count
-''    Dim openedXls As String
-''    openedXls = ActiveWorkbook.Path & "\b" & CStr(i) & ".xlsb"
-''    threadFileName = ActiveWorkbook.Path & "\" & CStr(i) & ".xlsb"
-''
-''    'Save the VBscript
-''    s = "Set objExcel = GetObject(""" & openedXls & """):"
-''    s = s & "With objExcel:"
-''    s = s & ".Application.Workbooks.Open(""" & threadFileName & """):"
-''    s = s & "End With:"
-''    'Save the VBscript file
-''    sFileName = ActiveWorkbook.Path & "\" & "open" & CStr(i) & ".vbs"
-''    Open sFileName For Output As #1
-''    Print #1, s
-''    Close #1
-''    'Execute the VBscript file asynchronously
-''    Set wsh = VBA.CreateObject("WScript.Shell")
-''    wsh.Run """" & sFileName & """"
-''    Set wsh = Nothing
-''
-''Next i
-''    ' Open one by one
-'''    For instanceIndexS = 1 To instanceIndex.count
-'''        threadFileName = ActiveWorkbook.Path & "\" & CStr(instanceIndexS) & ".xlsb"
-'''        instances(instanceIndex.Item(instanceIndexS)).Application.Workbooks.Open (threadFileName)
-'''    Next instanceIndexS
-'
-'    'Reopen
-'    Call ReOpenCores
-'End If
-'
-''Update Statusbar
-'Application.StatusBar = "Sync Core Complete, Opening Cores" & " " & CStr(Now())
-'End Sub

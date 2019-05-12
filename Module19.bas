@@ -1,6 +1,6 @@
 Attribute VB_Name = "Module19"
 Private mIntCutCopyMode As XlCutCopyMode
-Private mRngClipboard As Range
+Private mRngClipboard As range
 
 Public Sub subStoreClipboard()
     On Error GoTo ErrorHandler
@@ -33,12 +33,12 @@ Public Sub subStoreClipboard()
 
     'Extract link from pasted formula and clear range
     With Selection
-        strClipboardRange = Mid(.Cells(1, 1).Formula, 2)
-        If .Rows.count > 1 Or .Columns.count > 1 Then
+        strClipboardRange = Mid(.Cells(1, 1).formula, 2)
+        If .Rows.Count > 1 Or .Columns.Count > 1 Then
             strClipboardRange = strClipboardRange & ":" & _
-                Mid(.Cells(.Rows.count, .Columns.count).Formula, 2)
+                Mid(.Cells(.Rows.Count, .Columns.Count).formula, 2)
         End If
-        Set mRngClipboard = Range(strClipboardRange)
+        Set mRngClipboard = range(strClipboardRange)
         .Clear
      End With
 

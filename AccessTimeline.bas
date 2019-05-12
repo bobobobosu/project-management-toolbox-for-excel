@@ -1,45 +1,146 @@
 Attribute VB_Name = "AccessTimeline"
-Public Function getTableTitle(thisTable As Range)
+Public Function getTableTitle(thisTable As range)
     Dim CellName As String
-    CellName = Application.Caller.Address
-    Dim thisCell As Range
-    Set thisCell = Range(CellName)
-    getTableTitle = thisTable.Cells(1).offset(-1, (thisCell.Column - thisTable.Cells(1).Column))
+    CellName = Application.Caller.address
+    Dim thiscell As range
+    Set thiscell = range(CellName)
+    getTableTitle = thisTable.Cells(1).offset(-1, (thiscell.Column - thisTable.Cells(1).Column))
 End Function
-Public Function getTableTitleAdd(thisTable As Range)
+Public Function getTableTitleAdd(thisTable As range)
     Dim CellName As String
-    CellName = Application.Caller.Address
-    Dim thisCell As Range
-    Set thisCell = Range(CellName)
-    getTableTitleAdd = thisTable.Cells(1).offset(-1, (thisCell.Column - thisTable.Cells(1).Column)).Address
-End Function
-
-Public Function getTableTitleAbove(thisTable As Range)
-    Dim CellName As String
-    CellName = Application.Caller.Address
-    Dim thisCell As Range
-    Set thisCell = Range(CellName)
-    getTableTitleAbove = thisTable.Cells(1).offset(-2, (thisCell.Column - thisTable.Cells(1).Column))
+    CellName = Application.Caller.address
+    Dim thiscell As range
+    Set thiscell = range(CellName)
+    getTableTitleAdd = thisTable.Cells(1).offset(-1, (thiscell.Column - thisTable.Cells(1).Column)).address
 End Function
 
+Public Function getTableTitleAbove(thisTable As range)
+    Dim CellName As String
+    CellName = Application.Caller.address
+    Dim thiscell As range
+    Set thiscell = range(CellName)
+    getTableTitleAbove = thisTable.Cells(1).offset(-2, (thiscell.Column - thisTable.Cells(1).Column))
+End Function
+
+Public Function getTableTitleR(cell As range) As range
+    Set getTableTitleR = Worksheets("交易").Cells(3, cell.Column)
+End Function
+
+Public Function getTablebyColumn(cell As range) As range
+    Set getTablebyColumn = cell.Columns(Application.Caller.Column - cell.Column + 1)
+End Function
+Public Function sameFarthest(pos As range) As range
+    changed = False
+    Do While changed = False
+        If pos.offset(-1).Value2 = pos.Value2 Then
+            Set pos = pos.offset(-1)
+        Else
+            changed = True
+        End If
+    Loop
+    Set sameFarthest = pos
+End Function
+Public Function StructureAboveIgnoreFlag(title As Variant) As range
+    columnAdd = "表格2[" + title.Value2 + "]"
+    Dim pointer As range
+    Set pointer = Worksheets("交易").Cells(Application.Caller.Row - 1, range(columnAdd).Column)
+    
+    
+    Do While range(use_Structured(pointer, 3)).Value2 = 0 And range(use_Structured(pointer, 2)).Value2 <> vbNullString
+        Set pointer = pointer.offset(-1)
+    Loop
+    ff = pointer.address
+    Set StructureAboveIgnoreFlag = pointer
+End Function
+Public Function StructureBelowIgnoreFlag(title As Variant) As range
+    columnAdd = "表格2[" + title.Value2 + "]"
+    Dim pointer As range
+    Set pointer = Worksheets("交易").Cells(Application.Caller.Row + 1, range(columnAdd).Column)
+    
+    ff = range(use_Structured(pointer, 3)).address
+    Do While range(use_Structured(pointer, 2)).Value2 = 0 And range(use_Structured(pointer, 2)).Value2 <> vbNullString
+        Set pointer = pointer.offset(1)
+    Loop
+
+    Set StructureBelowIgnoreFlag = pointer
+End Function
+
+Public Function StructureAboveIgnoreFlagR(title As Variant, cell As range) As range
+    columnAdd = "表格2[" + title + "]"
+    Dim pointer As range
+    Set pointer = Worksheets("交易").Cells(cell.Row - 1, range(columnAdd).Column)
+    
+    ff = range(use_Structured(pointer, 3)).address
+    Do While range(use_Structured(pointer, 3)).Value2 = 0 And range(use_Structured(pointer, 2)).Value2 <> vbNullString
+        Set pointer = pointer.offset(-1)
+    Loop
+
+    Set StructureAboveIgnoreFlagR = pointer
+End Function
+
+Public Function StructureBelowIgnoreFlagR(title As Variant, cell As range) As range
+    columnAdd = "表格2[" + title + "]"
+    Dim pointer As range
+    Set pointer = Worksheets("交易").Cells(cell.Row + 1, range(columnAdd).Column)
+    
+    ff = range(use_Structured(pointer, 3)).address
+    Do While range(use_Structured(pointer, 2)).Value2 = 0 And range(use_Structured(pointer, 2)).Value2 <> vbNullString
+        Set pointer = pointer.offset(1)
+    Loop
+
+    Set StructureBelowIgnoreFlagR = pointer
+End Function
+
+Public Function StructureAboveR(title As Variant, cell As range) As range
+    columnAdd = "表格2[" + title + "]"
+    Dim pointer As range
+    Set pointer = Worksheets("交易").Cells(cell.Row - 1, range(columnAdd).Column)
+    Set StructureAboveR = pointer
+End Function
+Public Function StructureBelowR(title As Variant, cell As range) As range
+    columnAdd = "表格2[" + title + "]"
+    Dim pointer As range
+    Set pointer = Worksheets("交易").Cells(cell.Row + 1, range(columnAdd).Column)
+    Set StructureBelowR = pointer
+End Function
+
+Public Function StructureAbove(title As Variant) As range
+    columnAdd = "表格2[" + title.Value2 + "]"
+    Set StructureAbove = Worksheets("交易").Cells(Application.Caller.Row - 1, range(columnAdd).Column)
+End Function
+Public Function StructureBelow(title As Variant)
+    columnAdd = "表格2[" + title.Value2 + "]"
+    StructureBelow = Worksheets("交易").Cells(Application.Caller.Row + 1, range(columnAdd).Column)
+End Function
+Public Function StructureCol(title As range) As range
+    columnAdd = "表格2[" + title.Value2 + "]"
+    Set StructureCol = range(columnAdd)
+End Function
 Public Function cellAbove()
     Dim CellName As String
-    CellName = Application.Caller.Address
-    cellAbove = Range(CellName).offset(-1, 0).Value2
+    CellName = Application.Caller.address
+    cellAbove = range(CellName).offset(-1, 0).Value2
+End Function
+Public Function cellAboveIgnoreBlank(cell As range)
+    Dim pointer As range
+    Set pointer = range(cell.address)
+    Set pointer = pointer.offset(-1, 0)
+    Do While pointer = vbNullString
+        Set pointer = pointer.offset(-1, 0)
+    Loop
+    'pointer.offset(1, 0).Value2 = 10
+    cellAboveIgnoreBlank = pointer.Value2
 End Function
 Public Function cellAboveAdd()
     Dim CellName As String
-    CellName = Application.Caller.Address
-    cellAboveAdd = Range(CellName).offset(-1, 0).Address
+    CellName = Application.Caller.address
+    cellAboveAdd = range(CellName).offset(-1, 0).address
 End Function
 
 Public Function SyncedTable(thisTable As String, thatTable As String, index As String)
 
 End Function
-Public Sub ggggggggg()
-    Call CustomFunc1("getTableTitle(表格68)", 1, "表格6866 [編號]")
-End Sub
-Public Function CustomFunc1(A As Variant, B2 As Variant, c As Variant, D2 As Variant, E2 As Variant, f As Variant, g As Variant, H As Variant, i2 As Variant, j As Variant, k As Variant, L As Variant)
+Public Function CustomFunc1(A As Variant, B2 As Variant, C As Variant, D2 As Variant, E2 As Variant, f As Variant, g As Variant, H As Variant, i2 As Variant, j As Variant, k As Variant, L As Variant)
 'Original Function:
 '=IFERROR(Evals(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(INDEX(Evals("表格62["&getTableTitle(表格68)&"]"),MATCH([@交易物件],表格62[工作物件],0)),"amt",cellAboveAdd()),"title",getTableTitleAbove(表格68)),"cj",[@交易物件]))*1*[@完成],IFERROR(cellAbove()*1,0))+IFERROR(INDEX(Evals(("表格6866["&getTableTitle(表格68)&"]")),MATCH([@編號],表格6866[編號],0)),0)
 'Original Function2:
@@ -101,4 +202,10 @@ End Function
 Public Function CustomFunc2()
 'Original Function:
 '{=MAX(IFERROR((returnBuffer(OFFSET(表格68[[#標題],[a1]],1,0,ROWS(表格68),COLUMNS(表格62)-COLUMNS(表格62[[WBS]:[Location]])),[@編號],COLUMNS(表格62)-COLUMNS(表格62[[WBS]:[Location]]))),0)*--((ISNUMBER(SEARCH("+(-1)",OFFSET(INDEX(表格62[Location],MATCH([@交易物件],表格62[工作物件],0)),0,1,1,COLUMNS(表格62)-COLUMNS(表格62[[WBS]:[Location]])))))))}
+End Function
+
+
+Public Function CompleteStatus(r As range)
+    CompleteStatus = (Not range(use_Structured(r, 12)).HasFormula) Or ((Not range(use_Structured(r, 2)).HasFormula) And (Not range(use_Structured(r, 8)).HasFormula))
+    
 End Function

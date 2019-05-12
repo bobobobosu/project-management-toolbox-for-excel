@@ -8,29 +8,18 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 
-Private Sub Worksheet_Calculate()
 
-End Sub
+Private Sub Worksheet_SelectionChange(ByVal target As range)
 
-Private Sub Worksheet_PivotTableBeforeAllocateChanges(ByVal TargetPivotTable As PivotTable, ByVal ValueChangeStart As Long, ByVal ValueChangeEnd As Long, Cancel As Boolean)
-
-End Sub
-
-Private Sub Worksheet_PivotTableUpdate(ByVal target As PivotTable)
-
-End Sub
-
-Private Sub Worksheet_SelectionChange(ByVal target As Range)
-
-    If Worksheets("ам╤у").Range("A2").Value2 = False And Selection.Cells.count = 1 And Application.CutCopyMode = False Then
-        Set isect = Application.Intersect(Range(Evaluate("INDIRECT(""$F$1"")")), Selection)
+    If Worksheets("ам╤у").range("A2").Value2 = False And Selection.Cells.Count = 1 And Application.CutCopyMode = False Then
+        Set isect = Application.Intersect(range(Evaluate("INDIRECT(""$F$1"")")), Selection)
         If isect Is Nothing Then
             
         Else
                     'Updateby Extendoffice 20160704
             Application.ScreenUpdating = False
             
-            Dim rng As Range
+            Dim rng As range
             Dim cFnd As String
             Dim xTmp As String
             Dim x As Long
@@ -39,7 +28,7 @@ Private Sub Worksheet_SelectionChange(ByVal target As Range)
             On Error Resume Next
             cFnd = Selection.Value
             y = Len(cFnd)
-            For Each rng In Range(Evaluate("INDIRECT(""$F$1"")"))
+            For Each rng In range(Evaluate("INDIRECT(""$F$1"")"))
               'Selection.Font.Size = 12
               rng.Font.Size = 12
               rng.Font.Bold = False
@@ -49,7 +38,7 @@ Private Sub Worksheet_SelectionChange(ByVal target As Range)
                   xTmp = ""
                   For x = 0 To m - 1
                     xTmp = xTmp & Split(rng.Value, cFnd)(x)
-                    .Characters(start:=Len(xTmp) + 1, Length:=y).Font.Bold = True
+                    .Characters(Start:=Len(xTmp) + 1, Length:=y).Font.Bold = True
                     xTmp = xTmp & cFnd
                   Next
                 End If

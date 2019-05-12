@@ -30,16 +30,16 @@ On Error GoTo Error_handler:
     resultArray = GetMultiplicationBetweenNodes(fromArray, toArray, from_toArray, fromCell, toCell, mdictionary, graph)
     
     'return
-    'returnMode: 1=min 2=max 3=avg
+    'returnMode: 1=MAX 2=min 3=avg
     If returnMode = 1 Then
         'MAX
-        Dim count As Integer, maxVal As Double
+        Dim Count As Integer, maxVal As Double
         maxVal = resultArray(1)
-        For count = 2 To UBound(resultArray)
-            If resultArray(count) > maxVal Then
-                maxVal = resultArray(count)
+        For Count = 2 To UBound(resultArray)
+            If resultArray(Count) > maxVal Then
+                maxVal = resultArray(Count)
             End If
-        Next count
+        Next Count
         getMultFromCell = maxVal
     ElseIf returnMode = 2 Then
         'min
@@ -99,40 +99,41 @@ Function DFS(ByVal str_node As String, ByVal end_node As String, ByRef resultArr
     'Debug.Print id_to_String(foot, mdictionary)
     
     
-    Dim multi As Double
-    multi = GetMultiplication(visited, mdictionary, fromA, toA, from_toA)
+    
     
     
     Dim end_node_Long As Long
     end_node_Long = string_to_id(end_node, mdictionary)
     If end_node_Long = foot Then
-        ReDim Preserve resultArray(UBound(resultArray) + 1)
-        resultArray(UBound(resultArray)) = multi
+    
+        Call CalculateMulti(resultArray, visited, mdictionary, fromA, toA, from_toA)
+'        Dim multi As Double
+'        multi = GetMultiplication(visited, mdictionary, fromA, toA, from_toA)
+'        ReDim Preserve resultArray(UBound(resultArray) + 1)
+'        resultArray(UBound(resultArray)) = multi
         'Debug.Print '-------------'
         'Debug.Print multi
+    
+    
+    Else
+        'Debug.Print TypeName(child_node)
+        Dim childNum As Integer
+        childNum = UBound(child_node)
+        'Debug.Print childNum
+        If TypeName(child_node) <> "Empty" Then
+            For Each k In child_node
+
+
+                If Not b_value_in_array(k, visited) Then
+                    Call DFS(k, end_node, resultArray, graph, visited, fromA, toA, from_toA, mdictionary)
+                End If
+
+            Next k
+        End If
     End If
-    
-
-    'Debug.Print TypeName(child_node)
-    Dim childNum As Integer
-    childNum = UBound(child_node)
-    'Debug.Print childNum
-    If TypeName(child_node) <> "Empty" Then
-        For Each k In child_node
-            
-            
-            If Not b_value_in_array(k, visited) Then
-                Call DFS(k, end_node, resultArray, graph, visited, fromA, toA, from_toA, mdictionary)
-            End If
-                    
-        Next k
-    End If
-
-    
-
-    
-    
 End Function
+
+
 
 Public Function b_value_in_array(my_value As Variant, my_array As Variant, Optional b_is_string As Boolean = False) As Boolean
 
@@ -243,8 +244,8 @@ Function GetMultiplicationBetweenNodes(fromArray As Variant, toArray As Variant,
     Dim visited0 As Variant
     ReDim visited0(0)
     
-    Dim count As Integer
-    count = 0
+    Dim Count As Integer
+    Count = 0
     Dim resultArray As Variant
     ReDim resultArray(0)
 
@@ -257,18 +258,71 @@ Function GetMultiplicationBetweenNodes(fromArray As Variant, toArray As Variant,
 
 End Function
 
+Public Function CalculateMulti(resultArray As Variant, visited As Variant, mdictionary As Variant, fromA As Variant, toA As Variant, from_toA As Variant)
 
+        
+        Dim resultMulti As Variant
+        ReDim resultMulti(1)
+        resultMulti(UBound(resultMulti)) = 1
+        
+        Dim cou As Integer
+        cou = 0
+        For cou = 1 To UBound(visited) - 1
+            Dim possibleValueA As Variant
+            ReDim possibleValueA(0)
+        
+            Dim RowSearchCou As Integer
+            RowSearchCou = 1
+            For RowSearchCou = 1 To UBound(fromA)
+                Dim fromStr As String
+                fromStr = fromA(RowSearchCou, 1)
+                Dim toStr As String
+                toStr = toA(RowSearchCou, 1)
+                Dim tomult As Double
+                If string_to_id(fromStr, mdictionary) = visited(cou) And string_to_id(toStr, mdictionary) = visited(cou + 1) Then
+                    tomult = from_toA(RowSearchCou, 1)
+                    ReDim Preserve possibleValueA(UBound(possibleValueA) + 1)
+                    possibleValueA(UBound(possibleValueA)) = tomult
+                End If
+                
+                If string_to_id(toStr, mdictionary) = visited(cou) And string_to_id(fromStr, mdictionary) = visited(cou + 1) Then
+                    tomult = from_toA(RowSearchCou, 1)
+                    ReDim Preserve possibleValueA(UBound(possibleValueA) + 1)
+                    possibleValueA(UBound(possibleValueA)) = 1 / tomult
+                End If
+            Next
+            
+            resultMulti = CartesianProduct(resultMulti, possibleValueA)
+        Next
+        
+        cou = 0
+        For cou = 1 To UBound(resultMulti)
+            ReDim Preserve resultArray(UBound(resultArray) + 1)
+            resultArray(UBound(resultArray)) = resultMulti(cou)
+        Next
+        
+        
+End Function
+Function CartesianProduct(resultArray As Variant, possibleValueA As Variant) As Variant
+    
+    Dim product As Variant
+    ReDim product(1 To UBound(resultArray) * UBound(possibleValueA))
+    
+    Dim i As Integer
+    Dim j As Integer
+    For i = 1 To UBound(resultArray)
+        For j = 1 To UBound(possibleValueA)
+            product((i - 1) * UBound(possibleValueA) + j) = resultArray(i) * possibleValueA(j)
+        Next
+    Next
+    CartesianProduct = product
+End Function
 
 Function GetMultiplication(visited As Variant, mdictionary As Variant, fromA As Variant, toA As Variant, from_toA As Variant) As Double
     
     
     Dim multip As Double
     multip = 1
-    
-    
-    
-    
-     
     Dim cou As Integer
     cou = 0
     For cou = 1 To UBound(visited) - 1
@@ -283,21 +337,18 @@ Function GetMultiplication(visited As Variant, mdictionary As Variant, fromA As 
             If string_to_id(fromStr, mdictionary) = visited(cou) And string_to_id(toStr, mdictionary) = visited(cou + 1) Then
                 tomult = from_toA(RowSearchCou, 1)
                 multip = multip * tomult
+                Exit For
             End If
             
             If string_to_id(toStr, mdictionary) = visited(cou) And string_to_id(fromStr, mdictionary) = visited(cou + 1) Then
                 tomult = from_toA(RowSearchCou, 1)
-                
                 multip = multip / tomult
+                Exit For
             End If
             
             
         
         Next
-        
-
-    
-        
     Next
     GetMultiplication = multip
     

@@ -2,43 +2,45 @@ Attribute VB_Name = "Module28"
 
 Sub CopyFired()
 On Error Resume Next
-Range("ам╤у!C2").Value2 = AddressEx(Selection)
+range("ам╤у!C2").Value2 = AddressEx(Selection)
 Selection.Copy
 End Sub
 
 Sub CutFired()
 On Error Resume Next
-Range("ам╤у!C2").Value2 = AddressEx(Selection)
+range("ам╤у!C2").Value2 = AddressEx(Selection)
 Selection.Cut
 End Sub
 
 Sub Paste_Formula_Auto_Fast()
-    Dim tocopy As Range
-    Set tocopy = Range(Range("ам╤у!C2").Value2)
-    Dim selected As Range
+    Dim tocopy As range
+    Set tocopy = range(range("ам╤у!C2").Value2)
+    Dim selected As range
     Set selected = Selection
     
-  Dim rng2 As Range
-  Dim c As Range
+  Dim rng2 As range
+  Dim C As range
 Dim values() As Variant
-  For Each c In selected
+  For Each C In selected
     ' Add cells to rng2 if they exceed 10
-    If c.HasFormula = False And c.Value2 <> vbNullString Then
-        If (Not Not values) <> 0 Then
-            ' Array has been initialized, so you're good to go.
-            ReDim Preserve values(UBound(values) + 1)
-        Else
-            ' Array has NOT been initialized
-            ReDim values(0)
-        End If
-        values(UBound(values)) = c.Value2
-        If Not rng2 Is Nothing Then
-        ' Add the 2nd, 3rd, 4th etc cell to our new range, rng2
-        ' this is the most common outcome so place it first in the IF test (faster coding)
-            Set rng2 = Union(rng2, c)
-        Else
-        ' the first valid cell becomes rng2
-            Set rng2 = c
+    If C.HasFormula = False Then
+        If C.Value2 <> vbNullString Then
+            If (Not Not values) <> 0 Then
+                ' Array has been initialized, so you're good to go.
+                ReDim Preserve values(UBound(values) + 1)
+            Else
+                ' Array has NOT been initialized
+                ReDim values(0)
+            End If
+            values(UBound(values)) = C.Value2
+            If Not rng2 Is Nothing Then
+            ' Add the 2nd, 3rd, 4th etc cell to our new range, rng2
+            ' this is the most common outcome so place it first in the IF test (faster coding)
+                Set rng2 = Union(rng2, C)
+            Else
+            ' the first valid cell becomes rng2
+                Set rng2 = C
+            End If
         End If
     End If
   Next
@@ -48,27 +50,28 @@ Dim values() As Variant
    
     If tocopy.HasArray Then
         For Each sArea In Selection.Areas
-            sArea.Formula = tocopy.Formula
-            sArea.FormulaArray = sArea.Formula
+            sArea.formula = tocopy.formula
+            On Error Resume Next
+            sArea.FormulaArray = sArea.formula
         Next sArea
     Else
-        selected.Formula = tocopy.Formula
+        selected.formula = tocopy.formula
     End If
     
     
-    count = 0
+    Count = 0
     If Not (rng2 Is Nothing) Then
         For Each textCell In rng2.Cells
-            textCell.Value2 = values(count)
-            count = count + 1
+            textCell.Value2 = values(Count)
+            Count = Count + 1
         Next textCell
     End If
 End Sub
 
 Sub Paste_Formula_Ignore_Text_Auto()
-    Dim tocopy As Range
-    Set tocopy = Range(Range("ам╤у!C2").Value2)
-    Dim selected As Range
+    Dim tocopy As range
+    Set tocopy = range(range("ам╤у!C2").Value2)
+    Dim selected As range
     Set selected = Selection
     
     For Each sArea In selected.Areas
@@ -95,7 +98,7 @@ Sub Paste_Value_Transpose_Click()
     FirstCell = ""
     For Each cell In Selection
                 If FirstCell = "" Then
-                    FirstCell = cell.Address
+                    FirstCell = cell.address
                     Selection.PasteSpecial Paste:=xlValues, Transpose:=True
                 End If
             Next cell
@@ -107,7 +110,7 @@ Attribute Paste_Value_Click.VB_ProcData.VB_Invoke_Func = " \n14"
     FirstCell = ""
     For Each cell In Selection
                 If FirstCell = "" Then
-                    FirstCell = cell.Address
+                    FirstCell = cell.address
                     Selection.PasteSpecial Paste:=xlValues, Transpose:=False
                 End If
             Next cell
@@ -121,12 +124,12 @@ Sub Paste_Selection_Vertical()
     For Each cell In Selection
         LastSelRow = cell.Row
         LastSelCol = cell.Column
-        LastSel = cell.Address
+        LastSel = cell.address
     Next cell
     Dim mRow As Integer
     mRow = 0
     For Each cell In Selection
-        If cell.Address <> LastSel Then
+        If cell.address <> LastSel Then
             ActiveSheet.Cells(LastSelRow + mRow, LastSelCol).Value = cell.Value
             mRow = mRow + 1
         End If
@@ -135,39 +138,39 @@ Sub Paste_Selection_Vertical()
 End Sub
 
 Sub ClearMap()
-    Range("╩Ы╜х╧о!A:U").Clear
+    range("╩Ы╜х╧о!CG1:DL500").Clear
+End Sub
+
+Sub SelectMap()
+    range("╩Ы╜х╧о!CG1:DL500").Select
 End Sub
 Sub Clear()
     Dim FirstCell As String
     FirstCell = ""
-    For Each cell In Range(Evaluate("INDIRECT(""$AA$1"")"))
+    For Each cell In range(Evaluate("INDIRECT(""$AA$1"")"))
         cell.Value = ""
     Next cell
     Call CalculateRange5
     
 End Sub
-Sub gg()
-UserForm1.Show
-End Sub
 Sub Paste_Input_Click()
 Attribute Paste_Input_Click.VB_ProcData.VB_Invoke_Func = "t\n14"
-    FormShow UserForm2, ActiveCell
-    Dim copySelection As Range
+'    FormShow UserForm2, ActiveCell
+    Dim copySelection As range
     Set copySelection = Selection
     Dim FirstCellAddress As String
     For Each cell In Selection
-        If FirstCellAddress = "" Then
-            FirstCellAddress = cell.Address
-        End If
+        FirstCellAddress = cell.address
+        Exit For
     Next cell
 
-    If Range(FirstCellAddress).NumberFormat = "m/d/yyyy" Or Range(FirstCellAddress).NumberFormat = "h:mm:ss;@" Or Range(FirstCellAddress).NumberFormat = "m/d/yy h:mm;@" Then
+    If range(FirstCellAddress).NumberFormat = "m/d/yyyy" Or range(FirstCellAddress).NumberFormat = "h:mm:ss;@" Or range(FirstCellAddress).NumberFormat = "m/d/yy h:mm;@" Then
         Dim FirstCell2 As Variant
         'FirstCell2 = InputBox("Date Value", "Please Enter Date Value", Format(Range(FirstCellAddress).Value2, "m/d/yy"))
         UserForm1.Show 'vbModeless
-        FirstCell2 = Format(Range("ам╤у!I2").Value2, "m/d/yy")
+        FirstCell2 = Format(range("ам╤у!I2").Value2, "m/d/yy")
         Dim FirstCell3 As Variant
-        FirstCell3 = InputBox("Time Value", "Please Enter Time Value", Format(Range(FirstCellAddress).Value2, "h:mm:ss;@"))
+        FirstCell3 = InputBox("Time Value", "Please Enter Time Value", Format(range(FirstCellAddress).Value2, "h:mm:ss;@"))
         
         If FirstCell2 <> vbNullString Then
             For Each selected In copySelection
@@ -176,6 +179,9 @@ Attribute Paste_Input_Click.VB_ProcData.VB_Invoke_Func = "t\n14"
                 selected.Select
                 selected.PasteSpecial Paste:=xlValues, Transpose:=False
             Next selected
+'            Evaluate("ам╤у!$D$2").Value2 = dateValue(FirstCell2) + TimeValue(Format(selected.Value2, "h:mm:ss;@"))
+'            Evaluate("ам╤у!$D$2").Copy
+'            copySelection.PasteSpecial Paste:=xlValues, Transpose:=False
         End If
         
         If FirstCell3 <> vbNullString Then
@@ -185,45 +191,56 @@ Attribute Paste_Input_Click.VB_ProcData.VB_Invoke_Func = "t\n14"
                 selected.Select
                 selected.PasteSpecial Paste:=xlValues, Transpose:=False
             Next selected
+'                Evaluate("ам╤у!$D$2").Value2 = dateValue(Format(selected.Value2, "m/d/yy")) + TimeValue(FirstCell3)
+'                Evaluate("ам╤у!$D$2").Copy
+'                copySelection.PasteSpecial Paste:=xlValues, Transpose:=False
         End If
     Else
+        
         Dim FirstCell As Variant
-        FirstCell = InputBox("Change Value", "Please Enter Value", Range(FirstCellAddress).Value2)
+        FirstCell = f_ListSearch.Get_Input 'InputBox("Change Value", "Please Enter Value", Range(FirstCellAddress).Value2)
         If FirstCell <> vbNullString Then
-            For Each selected In copySelection
-                If IsNumeric(FirstCell) Then
-                    Evaluate("ам╤у!$D$2").Value2 = Evaluate(FirstCell)
-                    Evaluate("ам╤у!$D$2").Copy
-                Else
-                    Evaluate("ам╤у!$D$2").Value2 = FirstCell
-                    Evaluate("ам╤у!$D$2").Copy
-                End If
-                    selected.Select
-                    selected.PasteSpecial Paste:=xlValues, Transpose:=False
-            Next selected
+            If IsNumeric(FirstCell) Then
+                Evaluate("ам╤у!$D$2").Value2 = Evaluate("=" + CStr(FirstCell))
+                Evaluate("ам╤у!$D$2").Copy
+                Debug.Print FirstCell
+            Else
+                Evaluate("ам╤у!$D$2").Value2 = FirstCell
+                Evaluate("ам╤у!$D$2").Copy
+            End If
+'            For Each selected In copySelection
+'                    'selected.Select
+'                    selected.PasteSpecial Paste:=xlValues, Transpose:=False
+'            Next selected
+            copySelection.PasteSpecial Paste:=xlValues, Transpose:=False
         Else
-            For Each selected In copySelection
-                    selected.Value = vbNullString
-            Next selected
+'            For Each selected In copySelection
+'                    selected.Value = vbNullString
+'            Next selected
         End If
     End If
+    
+    
+    'Special Processing
+    For Each cell In Selection
+        If FirstCellAddress = "" Then
+            FirstCellAddress = cell.address
+        End If
+        If range(use_Structured(cell, 5)).address = cell.address Then
+            range(use_Structured(cell, 2)).Value2 = range(use_Structured(cell, 5)).Value2 - range(use_Structured(cell, 4)).Value2
+         End If
+    Next cell
+
     
     
 End Sub
 
 
 
-
-
-
-
-
-
-
 Sub Paste_Formula_Click()
     selected.Cells(1).PasteSpecial xlFormulas
-    myFormula = selected.Cells(1).Formula
-    selected.Formula = myFormula
+    myFormula = selected.Cells(1).formula
+    selected.formula = myFormula
 End Sub
 
 
@@ -231,7 +248,7 @@ End Sub
 Sub Paste_Formula_Ignore_Text_Click()
     Dim myFormula As String
     
-    Dim selected As Range
+    Dim selected As range
     Set selected = Selection
     
     On Error Resume Next
@@ -240,7 +257,7 @@ Sub Paste_Formula_Ignore_Text_Click()
             If cell.HasFormula = True Or cell.Value2 = "" Then
                         If myFormula = "" Then
                             cell.PasteSpecial xlFormulas
-                            myFormula = cell.Formula
+                            myFormula = cell.formula
                         End If
             End If
         End If
@@ -254,15 +271,15 @@ End Sub
 Sub Paste_FormulaArray_Ignore_Text_Click()
     Dim myFormula As String
     
-    Dim selected As Range
+    Dim selected As range
     Set selected = Selection
 
     On Error Resume Next
     selected(1).PasteSpecial xlFormulas
-    myFormula = cell.Formula
+    myFormula = cell.formula
     For Each cell In selected
         If cell.HasFormula = True Or cell.Value2 = "" Then
-                    myFormula = cell.Formula
+                    myFormula = cell.formula
                     cell.FormulaArray = myFormula
                     Debug.Print cell.Value
         End If
@@ -281,4 +298,17 @@ Function dateCheck(dateValue As Date) As Boolean
 =
         dateCheck = True
     End If
+End Function
+
+Function test_inters(rng1 As Variant, rng2 As Variant)
+    If (rng1.Parent.name = rng2.Parent.name) Then
+        Dim ints As range
+        Set ints = Application.Intersect(rng1, rng2)
+        If (Not (ints Is Nothing)) Then
+            ' Do your job
+            test_inters = True
+            Exit Function
+        End If
+    End If
+    test_inters = False
 End Function

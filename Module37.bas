@@ -1,14 +1,14 @@
 Attribute VB_Name = "Module37"
 Sub SetEndDate()
-    Dim copySelection As Range
+    Dim copySelection As range
     Set copySelection = Evaluate("表格2[[#This Row], [預計耗時]:[預計耗時]]")
     Set r = Evaluate("表格2[[#This Row], [End Date]:[End Date]]")
-    FirstCellAddress = r.Address
-    If Range(FirstCellAddress).NumberFormat = "m/d/yyyy" Or Range(FirstCellAddress).NumberFormat = "h:mm:ss;@" Or Range(FirstCellAddress).NumberFormat = "m/d/yy h:mm;@" Then
+    FirstCellAddress = r.address
+    If range(FirstCellAddress).NumberFormat = "m/d/yyyy" Or range(FirstCellAddress).NumberFormat = "h:mm:ss;@" Or range(FirstCellAddress).NumberFormat = "m/d/yy h:mm;@" Then
         Dim FirstCell2 As Variant
-        FirstCell2 = InputBox("Date Value", "Please Enter Date Value", Format(Range(FirstCellAddress).Value2, "m/d/yy"))
+        FirstCell2 = InputBox("Date Value", "Please Enter Date Value", Format(range(FirstCellAddress).Value2, "m/d/yy"))
         Dim FirstCell3 As Variant
-        FirstCell3 = InputBox("Time Value", "Please Enter Time Value", Format(Range(FirstCellAddress).Value2, "h:mm:ss;@"))
+        FirstCell3 = InputBox("Time Value", "Please Enter Time Value", Format(range(FirstCellAddress).Value2, "h:mm:ss;@"))
         
         If FirstCell2 <> vbNullString Then
             For Each selected In copySelection

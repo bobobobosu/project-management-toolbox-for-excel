@@ -1,30 +1,31 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm2 
    Caption         =   "Paste"
-   ClientHeight    =   1068
+   ClientHeight    =   1085
    ClientLeft      =   84
    ClientTop       =   408
    ClientWidth     =   5160
    OleObjectBlob   =   "UserForm2.frx":0000
-   StartUpPosition =   1  '©ÒÄÝµøµ¡¤¤¥¡
+   StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "UserForm2"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Public Scrollbar_justUpdated As Integer
 Public init As Boolean
 
 
 Private Sub CheckBox1_Click()
-If CheckBox1.Value = True Then Range("ÁÍ¶Õ!P2").Value = 1
-If CheckBox1.Value = False Then Range("ÁÍ¶Õ!P2").Value = 0
+If CheckBox1.Value = True Then range("ÁÍ¶Õ!P2").Value = 1
+If CheckBox1.Value = False Then range("ÁÍ¶Õ!P2").Value = 0
 End Sub
 
 Private Sub CheckBox2_Click()
-If CheckBox2.Value = True Then Range("ÁÍ¶Õ!O2").Value = 1
-If CheckBox2.Value = False Then Range("ÁÍ¶Õ!O2").Value = 0
+If CheckBox2.Value = True Then range("ÁÍ¶Õ!O2").Value = 1
+If CheckBox2.Value = False Then range("ÁÍ¶Õ!O2").Value = 0
 End Sub
 '
 'Private Sub CheckBox3_Click()
@@ -37,7 +38,7 @@ Private Sub CommandButton1_Click()
 End Sub
 
 Private Sub CommandButton10_Click()
-addOne_Click
+minusOne_Click
 End Sub
 
 Private Sub CommandButton11_Click()
@@ -57,7 +58,7 @@ Call LastMinusBelow
 End Sub
 
 Private Sub CommandButton15_Click()
-Call plusOneDay
+    Call plusOneDay
 End Sub
 
 Private Sub CommandButton16_Click()
@@ -94,7 +95,7 @@ For Each cell In Selection
    sum = sum + cell.Value2
 Next cell
 For Each cell In Selection
-        cell.Value2 = sum / Selection.count
+        cell.Value2 = sum / Selection.Count
 Next cell
 End Sub
 
@@ -107,7 +108,7 @@ Private Sub CommandButton23_Click()
 End Sub
 
 Private Sub CommandButton24_Click()
-Call TransferToCores(Selection)
+Selection.SpecialCells(xlCellTypeVisible).Select
 End Sub
 
 Private Sub CommandButton25_Click()
@@ -115,20 +116,24 @@ Private Sub CommandButton25_Click()
 End Sub
 
 Private Sub CommandButton26_Click()
- Call CalculateTable2ByOrder
+    If Selection.Cells.Count = 1 Then
+        Call CalculateNext(Selection)
+    Else
+        Call customCalculate
+    End If
 End Sub
 
 Private Sub CommandButton27_Click()
-Application.CutCopyMode = False
+    Application.CutCopyMode = False
 End Sub
 
 Private Sub CommandButton28_Click()
-            Range("ÁÍ¶Õ!U2").Value = 1
+            range("ÁÍ¶Õ!U2").Value = 1
             Call FilterSubject
 End Sub
 
 Private Sub CommandButton29_Click()
-            Range("ÁÍ¶Õ!U2").Value = 0
+            range("ÁÍ¶Õ!U2").Value = 0
             Call ClearFilterSubject
 End Sub
 
@@ -141,7 +146,8 @@ Private Sub CommandButton30_Click()
 End Sub
 
 Private Sub CommandButton31_Click()
- Call SortRowNumBySel
+    result = GeneratePlan(Selection, InputBox("Mode", , 1))
+    Call FillExampleWithArrayOfDict(result)
 End Sub
 
 Private Sub CommandButton32_Click()
@@ -180,7 +186,7 @@ Private Sub ScrollBar1_Change()
 If Scrollbar_justUpdated = 1 Then
     Scrollbar_justUpdated = Scrollbar_justUpdated - 1
 Else
-    If Selection.count >= 2 Then
+    If Selection.Count >= 2 Then
     
         ScrollBar1.Max = 100
         ScrollBar1.SmallChange = 1
@@ -196,25 +202,25 @@ Else
     
        Selection(1).Value = sum * ScrollBar1.Value / 100
        
-       For i = 2 To Selection.count
-        Selection(i).Value = sum * (1 - ScrollBar1.Value / 100) * (1 / (Selection.count - 1))
+       For i = 2 To Selection.Count
+        Selection(i).Value = sum * (1 - ScrollBar1.Value / 100) * (1 / (Selection.Count - 1))
        Next i
     End If
 End If
 End Sub
 
 Private Sub TextBox1_Change()
-    Range("¥æ©ö!B1") = TextBox1.Value
+    range("¥æ©ö!B1") = TextBox1.Value
 End Sub
 
 
 Private Sub ToggleButton1_Click()
     If init = False Then
         If ToggleButton1.Value = True Then
-            Range("ÁÍ¶Õ!U2").Value = 1
+            range("ÁÍ¶Õ!U2").Value = 1
             Call FilterSubject
         Else
-            Range("ÁÍ¶Õ!U2").Value = 0
+            range("ÁÍ¶Õ!U2").Value = 0
             Call ClearFilterSubject
         End If
     End If
@@ -223,11 +229,11 @@ End Sub
 
 Private Sub UserForm_Initialize()
     init = True
-    CheckBox1.Value = Range("ÁÍ¶Õ!P2").Value
-    CheckBox2.Value = Range("ÁÍ¶Õ!O2").Value
+    CheckBox1.Value = range("ÁÍ¶Õ!P2").Value
+    CheckBox2.Value = range("ÁÍ¶Õ!O2").Value
 '    CheckBox3.Value = Range("ÁÍ¶Õ!S2").Value
-    ToggleButton1 = Range("ÁÍ¶Õ!U2").Value
-    TextBox1.Value = Range("¥æ©ö!B1")
+    ToggleButton1 = range("ÁÍ¶Õ!U2").Value
+    TextBox1.Value = range("¥æ©ö!B1")
     Scrollbar_justUpdated = 0
     Call updateScrollbar
      init = False
@@ -238,7 +244,7 @@ Public Sub updateScrollbar()
     ScrollBar1.Max = 100
     ScrollBar1.SmallChange = 1
     ScrollBar1.LargeChange = 10
-If Selection.count >= 2 Then
+If Selection.Count >= 2 Then
     'scroll bar
     Dim sum As Double
     sum = 0

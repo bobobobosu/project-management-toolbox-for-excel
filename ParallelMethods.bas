@@ -4,21 +4,21 @@ Attribute VB_Name = "ParallelMethods"
 #Else
     Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long) 'For 32 Bit Systems
 #End If
-Public Const masterFileName  As String = "Z:\My Drive\_Storage\Backup\Documents\RAMDISK_loc\Documents\root\Data\TC.xlsb"
+
 'Save data to the master file
-Public Sub SaveRangeToMaster(masterWorkbookName As String, r As Range)
+Public Sub SaveRangeToMaster(masterWorkbookName As String, r As range)
     Set oXL = GetObject(masterFileName)
     For Each Item In r.Areas
             Dim caledArray As Variant
-            caledArray = Item.Formula
+            caledArray = Item.formula
             
             On Error Resume Next
             'oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).range(Item.Address)(1) = 0
-            If oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).HasArray Then
-                 oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula = caledArray
-                oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).FormulaArray = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula
+            If oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).HasArray Then
+                 oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula = caledArray
+                oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).FormulaArray = oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula
             Else
-                oXL.Application.Workbooks(1).Sheets(Item.Worksheet.Name).Range(Item.Address).Formula = caledArray
+                oXL.Application.Workbooks(1).Sheets(Item.Worksheet.name).range(Item.address).formula = caledArray
             End If
 
     Next Item
@@ -41,19 +41,19 @@ Public Function restorellAsString(inputFormula As String) As String
         End If
 End Function
 Function bypass_String255_in_eval(functionS As String) As String
-        Range("ам╤у!T2").Formula = functionS
-        bypass_String255_in_eval = Range("ам╤у!T2").Value2
+        range("ам╤у!T2").formula = functionS
+        bypass_String255_in_eval = range("ам╤у!T2").Value2
 End Function
-Function CheckRangeIdential(r As Range) As Boolean
+Function CheckRangeIdential(r As range) As Boolean
 If Checkll(r) Then
     Dim identical As Boolean
     identical = True
     Dim SameFormula As String
-    SameFormula = restorellAsString(r(1).Formula)
+    SameFormula = restorellAsString(r(1).formula)
     For Each cell In r
-        Dim scell As Range
+        Dim scell As range
         Set scell = cell
-            If restorellAsString(scell.Formula) <> SameFormula Then
+            If restorellAsString(scell.formula) <> SameFormula Then
                 identical = False
                 CheckRangeIdential = identical
                 Exit Function
@@ -64,13 +64,13 @@ Else
     CheckRangeIdential = False
 End If
 End Function
-Function CheckRangeIdential_noll(r As Range) As Boolean
+Function CheckRangeIdential_noll(r As range) As Boolean
     Dim identical As Boolean
     identical = True
     Dim SameFormula As String
-    SameFormula = r(1).Formula
+    SameFormula = r(1).formula
     For Each cell In r
-        If cell.Formula <> SameFormula Then
+        If cell.formula <> SameFormula Then
             identical = False
             CheckRangeIdential_noll = identical
             Exit Function
@@ -78,27 +78,28 @@ Function CheckRangeIdential_noll(r As Range) As Boolean
     Next cell
     CheckRangeIdential_noll = identical
 End Function
-Function RefreshCal(toRefresh As Range) As String
-    Set toRefresh = Filterll(toRefresh)
-        Call restorell(toRefresh)
-        Call convertll(toRefresh)
+Function RefreshCalAdd(toRefreshadd As Variant) As String
+    Dim toRefresh As range
+    Set toRefresh = Range2(toRefreshadd)
+    Call RefreshCal(toRefresh)
 End Function
-Sub wgrsteh()
-    Dim ggtrweg As Range
-    Set ggtrweg = Range("k2:L1896")
-    Debug.Print ggtrweg.Address
-    Call RefreshCal(ggtrweg)
-End Sub
-Function Filterll(r As Range, Optional seqFrom As Long, Optional seqTo As Long = -1, Optional columnMode As Long = 0) As Range
+Function RefreshCal(toRefresh As range) As String
+    Set toRefresh = Filterll(toRefresh)
+    If toRefresh Is Nothing Then Exit Function
+    Application.Workbooks(1).Sheets(toRefresh.Worksheet.name).Activate
+    Call restorell(toRefresh)
+    Call convertll(toRefresh)
+End Function
+Function Filterll(r As range, Optional seqFrom As Long, Optional seqTo As Long = -1, Optional columnMode As Long = 0) As range
     'seqFrom = seqTo =0: No Task
     'seqTo = -1: Filter All
-    Dim g As Range
+    Dim g As range
     Set g = Nothing
     If Not (r Is Nothing) Then
         If seqTo = -1 Then
             For Each Item In r.Areas
                 For Each cell In Item.Cells
-                    Dim r2 As Range
+                    Dim r2 As range
                     Set r2 = cell
                     If Checkll(r2) Then
                         If (g Is Nothing) Then
@@ -115,7 +116,7 @@ Function Filterll(r As Range, Optional seqFrom As Long, Optional seqTo As Long =
             'Cell mode
             If columnMode = 0 Then
                 For i = seqFrom To seqTo
-                    Dim nocolR As Range
+                    Dim nocolR As range
                     Set nocolR = getItemByIndexInRange(r, i)
                     'If Checkll(nocolR) Then
                         If (g Is Nothing) Then
@@ -129,18 +130,26 @@ Function Filterll(r As Range, Optional seqFrom As Long, Optional seqTo As Long =
             'Column mode
             ElseIf columnMode <> 0 Then
                 For j = (seqFrom) To (seqTo)
-                    For i = 1 To r.Columns(j).Rows.count
-                        Dim r3 As Range
-                        Set r3 = r.Cells(i, j)
-                        'If Checkll(r3) Then
-                                If (g Is Nothing) Then
-                                    Set g = r3
-                                Else
-                                    Set g = Union(g, r3)
-                                End If
-                        'End If
-                    Next i
+                
+                    If (g Is Nothing) Then
+                        Set g = r.Columns(j)
+                    Else
+                        Set g = Union(g, r.Columns(j))
+                    End If
+'                    g = r.Columns(j).Rows.count
+'                    For i = 1 To r.Columns(j).Rows.count
+'                        Dim r3 As Range
+'                        Set r3 = r.Cells(i, j)
+'                        'If Checkll(r3) Then
+'                                If (g Is Nothing) Then
+'                                    Set g = r3
+'                                Else
+'                                    Set g = Union(g, r3)
+'                                End If
+'                        'End If
+'                    Next i
                 Next j
+                rg = r.address
                 Set Filterll = g
             Else
                  Filterll = g
@@ -150,12 +159,12 @@ Function Filterll(r As Range, Optional seqFrom As Long, Optional seqTo As Long =
         Set Filterll = g
     End If
 End Function
-Public Function getItemByIndexInRange(r As Range, indexnum As Variant) As Range
+Public Function getItemByIndexInRange(r As range, indexnum As Variant) As range
     index = indexnum
-    If r.Areas.count > 1 Then
-        For i = 1 To r.Areas.count
-            If r.Areas(i).Cells.count < index Then
-                index = index - r.Areas(i).Cells.count
+    If r.Areas.Count > 1 Then
+        For i = 1 To r.Areas.Count
+            If r.Areas(i).Cells.Count < index Then
+                index = index - r.Areas(i).Cells.Count
             Else
                 Set getItemByIndexInRange = r.Areas(i).Cells(index)
                 Exit For
@@ -166,32 +175,37 @@ Public Function getItemByIndexInRange(r As Range, indexnum As Variant) As Range
     End If
 End Function
 
-Function Checkll(r As Range) As Boolean
-    Dim contains As Boolean
-    contains = True
+Function Checkll(r As range) As Boolean
+    Dim Contains As Boolean
+    Contains = True
     For Each cell In r.Cells
-        If (InStr(cell.Formula, "=ll(")) = 0 Then
-            contains = False
-            Checkll = contains
+        If (InStr(cell.formula, "=ll(")) = 0 Then
+            Contains = False
+            Checkll = Contains
             Exit Function
         End If
     Next cell
-    Checkll = contains
+    Checkll = Contains
 End Function
-Sub gwertd()
-    Call convertll(Range("C6:C28"))
-End Sub
-Public Function convertll(inR As Range)
+Public Function convertll(inR As range, Optional customFormula As Variant)
     If (inR Is Nothing) Then Exit Function
     For Each sArea In inR.Areas
         For Each sCol In sArea.Columns
-            Dim thisCol As Range
+            Dim thisCol As range
             Set thisCol = sCol
-            
-            If (Not Checkll(thisCol.Cells)) And (thisCol.Cells.count > 1) Then
+            f = IsMissing(customFormula)
+            If (Not IsMissing(customFormula) Or (Not Checkll(thisCol.Cells))) And (thisCol.Cells.Count > 1) Then
                     Dim calResultFor() As Variant
+                    
                     calResultVal = thisCol.Value2
-                    calResultFor = thisCol.Formula
+                    calResultFor = thisCol.formula
+                    
+                    If Not IsMissing(customFormula) Then
+                        For index = LBound(calResultFor) To UBound(calResultFor)
+                            calResultFor(index, 1) = customFormula
+                        Next
+                    End If
+                    
                     x = UBound(calResultVal, 1) - LBound(calResultVal, 1) + 1
                     y = UBound(calResultVal, 2) - LBound(calResultVal, 2) + 1
                     
@@ -203,32 +217,39 @@ Public Function convertll(inR As Range)
                     
                 If thisCol.HasArray Then
                     If Len(calResultFor(1, 1)) < 255 Then
-                        thisCol.Formula = calResultFor
-                        thisCol.FormulaArray = thisCol.Formula
+                        thisCol.formula = calResultFor
+                        thisCol.FormulaArray = thisCol.formula
                     End If
                 Else
-                    Debug.Print thisCol.Address
-                    Debug.Print inR.Address
-                    thisCol.Formula = calResultFor
+                    Debug.Print thisCol.address
+                    Debug.Print inR.address
+                    thisCol.formula = calResultFor
                 End If
             Else
                 For Each colC In sCol.Cells
-                    Dim cell As Range
+                    Dim cell As range
                     Set cell = colC
-                    If (Not Checkll(cell)) Then
+                    
+                    calResultVal2 = cell.Value2
+                    calResultFor2 = cell.formula
+                    If Not IsMissing(customFormula) Then
+                            formula = customFormula
+                    End If
+                    
+                    If (Not IsMissing(customFormula)) Or (Not Checkll(cell)) Then
                         If cell.HasArray Then
                             Dim ffff As String
-                            ffff = "=ll(" & convert2Con((replaceQuotes(cell.Formula))) & "," + CStr(dynamicCast(WorksheetFunction.IfError(cell.Value2, 0))) + ")"
+                            ffff = "=ll(" & convert2Con((replaceQuotes(calResultFor2))) & "," + CStr(dynamicCast(WorksheetFunction.IfError(calResultVal2, 0))) + ")"
                             If Len(ffff) < 255 Then
-                                cell.Formula = ffff
-                                cell.FormulaArray = cell.Formula
+                                cell.formula = ffff
+                                cell.FormulaArray = cell.formula
                             End If
                             'Call Set_FormulaArray(cell)
                         Else
                             Dim dd As String
-                            dd = "=ll(" & convert2Con((replaceQuotes(cell.Formula))) & "," + CStr(dynamicCast(WorksheetFunction.IfError(cell.Value2, 0))) + ")"
+                            dd = "=ll(" & convert2Con((replaceQuotes(calResultFor2))) & "," + CStr(dynamicCast(WorksheetFunction.IfError(calResultVal2, 0))) + ")"
                             'If Len(dd) < 255 Then
-                                cell.Formula = dd
+                                cell.formula = dd
                             'End If
                         End If
                     End If
@@ -237,7 +258,7 @@ Public Function convertll(inR As Range)
         Next sCol
     Next sArea
 End Function
-Public Function rangeIdentical(r As Range) As Boolean
+Public Function rangeIdentical(r As range) As Boolean
     For Each cell In r.Areas(1).Cells
             If (cell.FormulaArray = r.Areas(1).Cells(1).FormulaArray) And (cell.HasArray = r.Areas(1).Cells(1).HasArray) Then
             Else
@@ -247,40 +268,40 @@ Public Function rangeIdentical(r As Range) As Boolean
     Next cell
     rangeIdentical = True
 End Function
-Public Sub qwearfdeg()
-    Dim gtgt As Range
-    Set gtgt = Range("AM6:AM7")
-    gtgt.Formula = "=1"
-    gtgt.FormulaArray = gtgt.Formula
-End Sub
 
-Public Function restorell(inputR As Range)
+Public Function restorell(inputR As range)
     If (inputR Is Nothing) Then Exit Function
-    Dim cell As Range
+    Dim cell As range
     Set cell = inputR
     For Each sArea In cell.Areas
         For Each sColumn In sArea.Columns
-            Dim r As Range
+            Dim r As range
             Set r = Filterll(sColumn.Cells)
             If Not (r Is Nothing) Then
-                If CheckRangeIdential(r.Cells) And r.Cells.count > 1 Then
-                    identicalFormula = restorellAsString(r.Cells(1).Formula)
+                If CheckRangeIdential(r.Cells) And r.Cells.Count > 1 Then
+                    identicalFormula = restorellAsString(r.Cells(1).formula)
                     If r.Cells(1).HasArray Then
-                        sColumn.Formula = identicalFormula
-                        sColumn.FormulaArray = sColumn.Formula
+                        On Error Resume Next
+                        sColumn.formula = identicalFormula
+                        On Error Resume Next
+                        sColumn.FormulaArray = sColumn.formula
                     Else
-                        sColumn.Formula = identicalFormula
+                        On Error Resume Next
+                        sColumn.formula = identicalFormula
                     End If
                 Else
                     For Each icell In r.Cells
-                        Dim scell As Range
+                        Dim scell As range
                         Set scell = icell
-                        thisFormula = restorellAsString(scell.Formula)
+                        thisFormula = restorellAsString(scell.formula)
                         If scell.HasArray Then
-                            scell.Formula = thisFormula
-                            scell.FormulaArray = scell.Formula
+                            On Error Resume Next
+                            scell.formula = thisFormula
+                            On Error Resume Next
+                            scell.FormulaArray = scell.formula
                         Else
-                            scell.Formula = thisFormula
+                            On Error Resume Next
+                            scell.formula = thisFormula
                         End If
                     Next icell
                 End If
@@ -293,6 +314,9 @@ Public Sub Enablell()
 End Sub
 Public Sub Disablell()
     Call restorell(Selection)
+End Sub
+Public Sub Setll(inputR As range, formula As String, val As String)
+  
 End Sub
 Public Function cropString(inputstr As String, Optional front As String = "**", Optional endStr As String = "**")
     first = InStr(inputstr, front) + Len(front)
@@ -334,37 +358,23 @@ Else
     End If
 End If
 End Function
-
-
-
-Public Sub gertghsgbdv()
-    Dim ggggg As Range
-    Set ggggg = Range("$L$5:$L$2225")
-    Call restorell(ggggg)
-End Sub
-
-Sub gggggrgewsfd()
-    
-    MsgBox TypeName(dynamicCast(5))
-
-End Sub
-Function RangeToArray(inputRange As Range) As Variant
-   Dim inputArray As Variant
-   inputArray = inputRange.Value
-   RangeToArray = inputArray
+Function RangeToArray(inputRange As range) As Variant
+   Dim InputArray As Variant
+   InputArray = inputRange.Value
+   RangeToArray = InputArray
 End Function
 
 
 Public Sub SetRangeToMaster(masterWorkbookName As String, sheetName As String, rangeAddress As String, val As Variant)
     Dim oXL As Object
     Set oXL = GetObject(, "Excel.Application")
-    oXL.Workbooks(masterWorkbookName).Sheets(sheetName).Range(rangeAddress).Value = val
+    oXL.Workbooks(masterWorkbookName).Sheets(sheetName).range(rangeAddress).Value = val
     Set oXL = Nothing
 End Sub
 
 'Thread methods
 Public Function GetForThreadNr()
-    GetForThreadNr = CLng(Mid(ActiveWorkbook.Name, InStr(ActiveWorkbook.Name, "_") + 1, InStr(ActiveWorkbook.Name, ".") - InStr(ActiveWorkbook.Name, "_") - 1))
+    GetForThreadNr = CLng(Mid(ActiveWorkbook.name, InStr(ActiveWorkbook.name, "_") + 1, InStr(ActiveWorkbook.name, ".") - InStr(ActiveWorkbook.name, "_") - 1))
 End Function
 
 
@@ -384,11 +394,11 @@ Public Function ReadMyFunc(rng As String, index As Long) As String
     
     ReadMyFunc = vaArgs(index)
 End Function
-Public Sub Set_FormulaArray(r As Range)
-    Set r = Range("E1")
+Public Sub Set_FormulaArray(r As range)
+    Set r = range("E1")
     'r.Formula = range("k5").Formula
     Dim formulaStr As String
-    formulaStr = r.Formula
+    formulaStr = r.formula
     formulaStr = replaceQuotes(formulaStr)
     formulaStr = Right(formulaStr, Len(formulaStr) - 1)
     inputString = formulaStr
@@ -407,47 +417,13 @@ Public Sub Set_FormulaArray(r As Range)
 '    On Error Resume Next
 '    r.Replace Chr(34), ""
 '    r.Replace Chr(34) & "&" & Chr(34), ""
-    jj = Replace(Replace(Replace(r.Formula, Chr(34) & "&" & Chr(34), ""), Chr(34), ""), "~", Chr(34))
-    kk = evals(r.Formula)
-    w = evals(Replace(Replace(Replace(r.Formula, Chr(34) & "&" & Chr(34), ""), Chr(34), ""), "~", Chr(34)))
+    jj = Replace(Replace(Replace(r.formula, Chr(34) & "&" & Chr(34), ""), Chr(34), ""), "~", Chr(34))
+    kk = evals(r.formula)
+    W = evals(Replace(Replace(Replace(r.formula, Chr(34) & "&" & Chr(34), ""), Chr(34), ""), "~", Chr(34)))
     ee = 1
-End Sub
-Sub gggewrgr()
-       Call Set_FormulaArray(Range("E1"))
-End Sub
-Sub ggf()
-    Dim bbb As String
-    bbb = bracketString("hhhh", "**", "**")
-    MsgBox bbb
-    bbb = cropString(bbb, "**", "**")
-    MsgBox bbb
-End Sub
-
-Public Sub gtershtsxdfb()
-    Dim gggggg As String
-    gggggg = "nafweildjfbgaoiuewhnirk"
-    convert2Con (gggggg)
-End Sub
-
-
-Sub ggggg()
-    Set g = Range("D3:D5").Columns(1)
-   MsgBox Range("D3:D5").Columns(1).Rows.count
-End Sub
-Sub gg()
-    Dim returnR As Range
-    Set r = Range("A1")
-    threadFileName = ActiveWorkbook.path & "\" & "TC.xlsb"
-    Set oXL = GetObject(threadFileName)
-    oXL.Application.Workbooks(1).Sheets(r.Worksheet.Name).Range(r.Address) = r '.PasteSpecial xlFormulas
-    
-
 End Sub
 
 
 Public Function hhhhh()
-    gggg = Now()
-    Do Until Now() > (gggg + TimeValue("00:00:10"))
-        x = x + 1
-    Loop
+    Call convertll(Selection, "=NOW()")
 End Function

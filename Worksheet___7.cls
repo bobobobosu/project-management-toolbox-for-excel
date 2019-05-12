@@ -9,14 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 
 
-Private Sub Worksheet_Activate()
-    Call CalculateRange3
-    On Error Resume Next
-    Range(Evaluate("INDIRECT(""$F$3"")")).Select
-    ActiveWindow.ScrollRow = Selection.Row
-End Sub
-
-Private Sub Worksheet_SelectionChange(ByVal target As Range)
+Private Sub Worksheet_SelectionChange(ByVal target As range)
 
 
     'Dim CurrVal As Double
@@ -37,17 +30,17 @@ Private Sub Worksheet_SelectionChange(ByVal target As Range)
         End If
     End If
 
-    If Worksheets("ам╤у").Range("A2").Value2 = False And Selection.Cells.count = 1 And Application.CutCopyMode = False Then
-        Set isect = Application.Intersect(Range(Evaluate("INDIRECT(""$C$5"")")), Selection)
-        Range("$AG$5").Calculate
-        Range("$AH$5").Calculate
+    If Worksheets("ам╤у").range("A2").Value2 = False And Selection.Cells.Count = 1 And Application.CutCopyMode = False Then
+        Set isect = Application.Intersect(range(Evaluate("INDIRECT(""$C$5"")")), Selection)
+        range("$AG$5").Calculate
+        range("$AH$5").Calculate
         If isect Is Nothing Then
             
         Else
                     'Updateby Extendoffice 20160704
             Application.ScreenUpdating = False
             
-            Dim rng As Range
+            Dim rng As range
             Dim cFnd As String
             Dim xTmp As String
             Dim x As Long
@@ -56,7 +49,7 @@ Private Sub Worksheet_SelectionChange(ByVal target As Range)
             On Error Resume Next
             cFnd = Selection.Value
             y = Len(cFnd)
-            For Each rng In Range(Evaluate("INDIRECT(""$C$5"")"))
+            For Each rng In range(Evaluate("INDIRECT(""$C$5"")"))
               'Selection.Font.Size = 12
               rng.Font.Size = 12
               rng.Font.Bold = False
@@ -66,7 +59,7 @@ Private Sub Worksheet_SelectionChange(ByVal target As Range)
                   xTmp = ""
                   For x = 0 To m - 1
                     xTmp = xTmp & Split(rng.Value, cFnd)(x)
-                    .Characters(start:=Len(xTmp) + 1, Length:=y).Font.Bold = True
+                    .Characters(Start:=Len(xTmp) + 1, Length:=y).Font.Bold = True
                     xTmp = xTmp & cFnd
                   Next
                 End If

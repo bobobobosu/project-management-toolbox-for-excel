@@ -1,7 +1,7 @@
 Attribute VB_Name = "Module32"
 Public Function randBetweenExcludeRange(lngBottom As Long, lngTop As Long, _
-                                        rngExcludeValues As Range) As Variant
-    Dim c                               As Range
+                                        rngExcludeValues As range) As Variant
+    Dim C                               As range
     Dim dict                            As Object
     Dim i                               As Long
     Dim blNoItemsAvailable              As Boolean
@@ -22,19 +22,19 @@ Public Function randBetweenExcludeRange(lngBottom As Long, lngTop As Long, _
     'get a list of all items in range
     'i = 0
     Set dict = CreateObject("Scripting.dictionary")
-    For Each c In rngExcludeValues
+    For Each C In rngExcludeValues
         'I should have really only checked for c.values that are longs.
-        If IsNumeric(c.Value) Then
-            If c.Value >= lngBottom And c.Value <= lngTop Then
-                If Not dict.Exists(c.Value) Then
-                    dict.Add c.Value, ""
+        If IsNumeric(C.Value) Then
+            If C.Value >= lngBottom And C.Value <= lngTop Then
+                If Not dict.Exists(C.Value) Then
+                    dict.Add C.Value, ""
                 End If
             End If
         End If
-    Next c
+    Next C
  
     'check to make sure that there are values available to use
-    If dict.count >= lngTop - lngBottom + 1 Then
+    If dict.Count >= lngTop - lngBottom + 1 Then
         'initialize error holder to true
         blNoItemsAvailable = True
         For i = lngBottom To lngTop
@@ -64,7 +64,7 @@ End Function
 
 Sub generateID()
     For Each cell In Evaluate("表格2[ID]")
-        Dim usedId As Range
+        Dim usedId As range
         Set usedId = Evaluate("表格2[ID]")
         Dim rownum As Long
         rownum = Evaluate("ROWS(表格2[ID])")
@@ -74,28 +74,62 @@ Sub generateID()
         
     Next cell
     'Range(Evaluate("INDIRECT(""BB2"")")).Value2 = ""
-    Range("表格2[ID]").Cells(1).offset(1, 0).Clear
-    Range("表格2[ID]").Cells(1).offset(2, 0).Clear
-    Range("表格2[ID]").Cells(1).offset(3, 0).Clear
+    Call ClearId
+End Sub
+Sub ClearId()
+    range("表格2[ID]").Cells(1).offset(1, 0).Clear
 End Sub
 
-
 Sub updateID_6866()
-    Call updateIDtable("表格6866[ID]")
+    Call updateIDtable2("表格6866[ID]")
 End Sub
 
 Sub updateID_68()
-    Call updateIDtable("表格68[ID]")
+    Call updateIDtable2("表格68[ID]")
 End Sub
 
 Sub updateID()
-    Call updateIDtable("表格6866[ID]")
-    Call updateIDtable("表格68[ID]")
+    Call updateIDtable2("表格6866[ID]")
+'    Call updateIDtable2("表格68[ID]")
+End Sub
+Sub updateIDtable2(tableToUpdate As String)
+    Dim usedId As Collection
+    Set usedId = New Collection
+    Dim existId As Collection
+    Set existId = New Collection
+    
+    Dim existIdA As Variant
+    Dim usedIdA As Variant
+    existIdA = range("表格2[ID]").Value2
+    usedIdA = range(tableToUpdate).Value2
+    
+    For i = 1 To UBound(existIdA)
+        If CStr(existIdA(i, 1)) <> vbNullString Then
+            existId.Add existIdA(i, 1), CStr(existIdA(i, 1))
+        End If
+    Next
+    
+    For i = 1 To UBound(usedIdA)
+        If CStr(usedIdA(i, 1)) <> vbNullString Then
+            If Contains(existId, CStr(usedIdA(i, 1))) Then
+                existId.Remove CStr(usedIdA(i, 1))
+            End If
+        End If
+    Next
+    
+    
+    For Each cell In Evaluate(tableToUpdate)
+        If cell.Value2 = "" And existId.Count > 0 Then
+            cell.Value2 = existId(1)
+            existId.Remove 1
+        End If
+    Next cell
+    
 End Sub
 Sub updateIDtable(tableToUpdate As String)
-    Dim usedId As Range
+    Dim usedId As range
     Set usedId = Evaluate(tableToUpdate)
-    Dim existId As Range
+    Dim existId As range
     Set existId = Evaluate("表格2[ID]")
     Dim selected As Long
     
@@ -127,18 +161,30 @@ Sub updateIDtable(tableToUpdate As String)
     Next existIdv
 
     
-    Dim count As Long
-    count = 2
+    Dim Count As Long
+    Count = 2
 
     For Each cell In Evaluate(tableToUpdate)
-        If UBound(avalibleIds) >= count Then
+        If UBound(avalibleIds) >= Count Then
             If cell.Value2 = "" Then
                 
-                    cell.Value2 = avalibleIds(count)
-                    count = count + 1
+                    cell.Value2 = avalibleIds(Count)
+                    Count = Count + 1
                     
             End If
         End If
     Next cell
 
 End Sub
+
+
+Public Function Contains(col As Collection, key As Variant) As Boolean
+Dim obj As Variant
+On Error GoTo err
+    Contains = True
+    obj = col(key)
+    Exit Function
+err:
+
+    Contains = False
+End Function

@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 
 
-Private Sub Worksheet_SelectionChange(ByVal target As Range)
+Private Sub Worksheet_SelectionChange(ByVal target As range)
     
     'Dim CurrVal As Double
     'CurrVal = ActiveCell.VALUE
@@ -41,8 +41,8 @@ End Sub
 Sub ShowNames()
     Dim x&
     With ActiveWorkbook.ActiveSheet
-        For x = 1 To .Shapes.count
-            Debug.Print .Shapes(x).Name
+        For x = 1 To .Shapes.Count
+            Debug.Print .Shapes(x).name
     Next
     End With
 End Sub

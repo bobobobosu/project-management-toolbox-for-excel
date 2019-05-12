@@ -1,4 +1,27 @@
 Attribute VB_Name = "TimeLineOperation"
+Sub FillExampleWithArrayOfDict(Optional plan As Variant)
+    If IsMissing(plan) Then
+        jsonPlan = Selection
+    Else
+        jsonPlan = plan
+    End If
+    
+    Dim result As Collection
+    Set result = JsonConverter.ParseJson(jsonPlan)
+    Set FillRow = FirstExample()
+    For Each dict In result
+        
+        Dim key As Variant
+        
+        For Each key In dict.Keys
+            Debug.Print key, dict(key), use_Structured2R(FillRow, "表格2", key).address
+            Dim target As range
+            use_Structured2R(FillRow, "表格2", key).Value2 = dict(key)
+        Next key
+        Set FillRow = FillRow.offset(1)
+    Next
+End Sub
+
 Sub AlignNow_Click()
             Dim DATECell As String
             DATECell = ""
@@ -30,16 +53,16 @@ Sub AlignNow_Click()
 '                End If
 '            Next cell
 '
-            Dim DATECellR As Range
-            Set DATECellR = Application.InputBox(Prompt:="Cell to Align", Title:="Select...", Type:=8)
-            Dim PrevCellR As Range
-            Set PrevCellR = Application.InputBox(Prompt:="Cell Before", Title:="Select...", Type:=8)
-            Dim NextCellR As Range
-            Set NextCellR = Application.InputBox(Prompt:="Cell After", Title:="Select...", Type:=8)
+            Dim DATECellR As range
+            Set DATECellR = Application.InputBox(Prompt:="Cell to Align", title:="Select...", Type:=8)
+            Dim PrevCellR As range
+            Set PrevCellR = Application.InputBox(Prompt:="Cell Before", title:="Select...", Type:=8)
+            Dim NextCellR As range
+            Set NextCellR = Application.InputBox(Prompt:="Cell After", title:="Select...", Type:=8)
             
-            DATEVal = Range(use_Structured(DATECellR, 4)).Value2
-            PrevVal = Range(use_Structured(PrevCellR, 2)).Value2
-            NextVal = Range(use_Structured(NextCellR, 2)).Value2
+            DATEVal = range(use_Structured(DATECellR, 4)).Value2
+            PrevVal = range(use_Structured(PrevCellR, 2)).Value2
+            NextVal = range(use_Structured(NextCellR, 2)).Value2
             
 '            DATEVal = Range(use_Structured(Range(DATECell), 4)).Value2
 '            PrevVal = Range(use_Structured(Range(PrevtCell), 2)).Value2
@@ -52,9 +75,9 @@ Sub AlignNow_Click()
 '            Range(NextCell).Value = NextVal - OFFSET
 '            Range(DATECell).Value = Now
         
-            Range(use_Structured(PrevCellR, 2)).Value = PrevVal + offset
-            Range(use_Structured(NextCellR, 2)).Value = NextVal - offset
-            Range(use_Structured(DATECellR, 4)).Value = Now
+            range(use_Structured(PrevCellR, 2)).Value = PrevVal + offset
+            range(use_Structured(NextCellR, 2)).Value = NextVal - offset
+            range(use_Structured(DATECellR, 4)).Value = Now
             Call CalculateRange2
 End Sub
 Sub Aligned_Click()
@@ -81,37 +104,37 @@ Sub Aligned_Click()
             
             For Each cell In Selection
                 If DATECell = "" Then
-                    DATECell = cell.Address
+                    DATECell = cell.address
                     'DATEVal = cell.Value2
                 ElseIf toDATECell = "" Then
-                    toDATECell = cell.Address
+                    toDATECell = cell.address
                     'toDATEVal = cell.Value2
                 ElseIf PrevCell = "" Then
-                    PrevCell = cell.Address
+                    PrevCell = cell.address
                     'PrevVal = cell.Value2
                 ElseIf NextCell = "" Then
-                    NextCell = cell.Address
+                    NextCell = cell.address
                     'NextVal = cell.Value2
                 End If
             Next cell
             
             
             
-            Dim DATECellR As Range
-            Set DATECellR = Application.InputBox(Prompt:="Cell to Align", Title:="Select...", Type:=8)
-            Dim PrevCellR As Range
-            Set PrevCellR = Application.InputBox(Prompt:="Cell Before", Title:="Select...", Type:=8)
-            Dim NextCellR As Range
-            Set NextCellR = Application.InputBox(Prompt:="Cell After", Title:="Select...", Type:=8)
+            Dim DATECellR As range
+            Set DATECellR = Application.InputBox(Prompt:="Cell to Align", title:="Select...", Type:=8)
+            Dim PrevCellR As range
+            Set PrevCellR = Application.InputBox(Prompt:="Cell Before", title:="Select...", Type:=8)
+            Dim NextCellR As range
+            Set NextCellR = Application.InputBox(Prompt:="Cell After", title:="Select...", Type:=8)
 
             Dim FirstCell3 As Variant
             FirstCell3 = InputBox("Time Value", "Please Enter Time Value", Format(Now(), "m/d/yy h:mm:ss;@"))
             
             If (FirstCell3 <> vbNullString) Then
             
-                DATEVal = Range(use_Structured(DATECellR, 4)).Value2
-                PrevVal = Range(use_Structured(PrevCellR, 2)).Value2
-                NextVal = Range(use_Structured(NextCellR, 2)).Value2
+                DATEVal = range(use_Structured(DATECellR, 4)).Value2
+                PrevVal = range(use_Structured(PrevCellR, 2)).Value2
+                NextVal = range(use_Structured(NextCellR, 2)).Value2
                 toDATEVal = dateValue(FirstCell3) + TimeValue(FirstCell3)
                 
                   
@@ -125,9 +148,9 @@ Sub Aligned_Click()
                 Dim offset As Double
                 offset = toDATEVal - DATEVal
                 
-                Range(use_Structured(PrevCellR, 2)).Value = PrevVal + offset
-                Range(use_Structured(NextCellR, 2)).Value = NextVal - offset
-                Range(use_Structured(DATECellR, 4)).Value = toDATEVal
+                range(use_Structured(PrevCellR, 2)).Value = PrevVal + offset
+                range(use_Structured(NextCellR, 2)).Value = NextVal - offset
+                range(use_Structured(DATECellR, 4)).Value = toDATEVal
             
             
             End If
@@ -136,151 +159,103 @@ Sub Aligned_Click()
 
 End Sub
 
-Sub TaskComplete()
-Dim r As Range
 
-Set r = Evaluate("表格2[[#This Row], [Description]:[Description]]")
-r.Value2 = r.Value2
-
-'r.Select
-'Call toText_Click
-
-'Set r = Evaluate("表格2[[#This Row], [SU-MIN]:[SU-MIN]]")
-'r.Value2 = r.Value2
-''r.Select
-''Call toText_Click
-'
-'Set r = Evaluate("表格2[[#This Row], [完整耗時]:[完整耗時]]")
-'r.Value2 = r.Value2
-'''r.Select
-'''Call toText_Click
-
-Set r = Evaluate("表格2[[#This Row], [Location]:[Location]]")
-r.Value2 = r.Value2
-'r.Select
-'Call toText_Click
-
-
-Set r = Evaluate("表格2[[#This Row], [Latitude]:[Latitude]]")
-r.Value2 = r.Value2
-'r.Select
-'Call toText_Click
-
-Set r = Evaluate("表格2[[#This Row], [Longitude]:[Longitude]]")
-r.Value2 = r.Value2
-'r.Select
-'Call toText_Click
-
-Set r = Evaluate("表格2[[#This Row], [實際百分比]:[實際百分比]]")
-r.Value2 = r.Value2
-'r.Select
-'Call toText_Click
-
-Set r = Evaluate("表格2[[#This Row], [起始百分比]:[起始百分比]]")
-r.Value2 = r.Value2
-'r.Select
-'Call toText_Click
-
-
-Set r = Evaluate("表格2[[#This Row], [SU]:[SU]]")
-r.Value2 = r.Value2
-'r.Select
-'Call toText_Click
-Set r = Evaluate("表格2[[#This Row], [時區]:[時區]]")
-r.Value2 = r.Value2
-
-
-End Sub
 
 Sub Completed()
-    For Each cell In Selection
-        cell.Select
-        Call TaskComplete
-        Set r = Evaluate("表格2[[#This Row], [實際耗時]:[實際耗時]]")
-        r.Value2 = r.Value2
-    Next cell
-    
-    'Call CalculateRange2
+
+    Call TaskComplete(Selection)
+    samerowsOf(Selection, range("表格2[實際耗時]")).Value2 = samerowsOf(Selection, range("表格2[實際耗時]")).Value2
 End Sub
-
-
+Sub CalculateNext(Start As Variant)
+    Dim cell As range
+    Set cell = Start
+    Dim tocal As range
+    Set tocal = cell
+    Set cell = cell.offset(1)
+    Do While range(use_Structured(cell, 4)).HasFormula
+        Set tocal = Union(cell, tocal)
+        Set cell = cell.offset(1)
+    Loop
+    Call CalculateTable2ByOrder(tocal)
+End Sub
 Sub CompleteNow()
-    Call TaskComplete
-    Set r = Evaluate("表格2[[#This Row], [實際耗時]:[實際耗時]]")
-    r.Value = Now - Evaluate("表格2[[#This Row], [Start Date]:[Start Date]]")
+    Dim cell As range
+    Set cell = Selection
+    Call TaskComplete(cell)
+    range(use_Structured(cell, 3)).Value2 = Now - range(use_Structured(cell, 4)).Value2
     
-    'Call CalculateRange2
+    Call CalculateNext(cell)
 End Sub
+Sub StartNow()
+    Dim cell As range
+    Set cell = Selection
+    range(use_Structured(cell, 4)).Value2 = Now
+    
+    Call CalculateNext(cell)
 
+End Sub
+Sub trgey()
+    MsgBox AddressEx(samerowsOf(Selection, range("表格2[交易物件]")))
+End Sub
+Sub TaskComplete(cell As range)
+samerowsOf(cell, range("表格2[currResource]")).Value2 = samerowsOf(cell, range("表格2[currResource]")).Value2
+samerowsOf(cell, range("表格2[Description]")).Value2 = samerowsOf(cell, range("表格2[Description]")).Value2
+samerowsOf(cell, range("表格2[Location]")).Value2 = samerowsOf(cell, range("表格2[Location]")).Value2
+samerowsOf(cell, range("表格2[實際百分比]")).Value2 = samerowsOf(cell, range("表格2[實際百分比]")).Value2
+samerowsOf(cell, range("表格2[進度]")).Value2 = samerowsOf(cell, range("表格2[進度]")).Value2
+samerowsOf(cell, range("表格2[起始百分比]")).Value2 = samerowsOf(cell, range("表格2[起始百分比]")).Value2
+samerowsOf(cell, range("表格2[時區]")).Value2 = samerowsOf(cell, range("表格2[時區]")).Value2
+samerowsOf(cell, range("表格2[SU]")).Value2 = samerowsOf(cell, range("表格2[SU]")).Value2
+samerowsOf(cell, range("表格2[SU-MIN]")).Value2 = samerowsOf(cell, range("表格2[SU-MIN]")).Value2
+samerowsOf(cell, range("表格2[完整耗時]")).Value2 = samerowsOf(cell, range("表格2[完整耗時]")).Value2
+samerowsOf(cell, range("表格2[剩餘時間]")).Value2 = samerowsOf(cell, range("表格2[剩餘時間]")).Value2
+samerowsOf(cell, range("表格2[現在預計進度]")).Value2 = samerowsOf(cell, range("表格2[現在預計進度]")).Value2
+samerowsOf(cell, range("表格2[預計百分比]")).Value2 = samerowsOf(cell, range("表格2[預計百分比]")).Value2
+samerowsOf(cell, range("表格2[起始百分比]")).Value2 = samerowsOf(cell, range("表格2[起始百分比]")).Value2
+samerowsOf(cell, range("表格2[至完成還有]")).Value2 = samerowsOf(cell, range("表格2[至完成還有]")).Value2
+samerowsOf(cell, range("表格2[已耗時]")).Value2 = samerowsOf(cell, range("表格2[已耗時]")).Value2
+samerowsOf(cell, range("表格2[已節省]")).Value2 = samerowsOf(cell, range("表格2[已節省]")).Value2
+samerowsOf(cell, range("表格2[Dist. To Avg]")).Value2 = samerowsOf(cell, range("表格2[Dist. To Avg]")).Value2
+samerowsOf(cell, range("表格2[分進度(%/min)]")).Value2 = samerowsOf(cell, range("表格2[分進度(%/min)]")).Value2
+samerowsOf(cell, range("表格2[Probability]")).Value2 = samerowsOf(cell, range("表格2[Probability]")).Value2
+samerowsOf(cell, range("表格2[執行率]")).Value2 = samerowsOf(cell, range("表格2[執行率]")).Value2
+samerowsOf(cell, range("表格2[Subject]")).Value2 = samerowsOf(cell, range("表格2[Subject]")).Value2
+samerowsOf(cell, range("表格2[Location Verify]")).Value2 = samerowsOf(cell, range("表格2[Location Verify]")).Value2
+samerowsOf(cell, range("表格2[Chain Verify]")).Value2 = samerowsOf(cell, range("表格2[Chain Verify]")).Value2
+samerowsOf(cell, range("表格2[Dependency Verify]")).Value2 = samerowsOf(cell, range("表格2[Dependency Verify]")).Value2
+samerowsOf(cell, range("表格2[Concurrency]")).Value2 = samerowsOf(cell, range("表格2[Concurrency]")).Value2
+samerowsOf(cell, range("表格2[Certainty]")).Value2 = samerowsOf(cell, range("表格2[Certainty]")).Value2
+samerowsOf(cell, range("表格2[Buffer]")).Value2 = samerowsOf(cell, range("表格2[Buffer]")).Value2
+samerowsOf(cell, range("表格2[Chain Blanks]")).Value2 = samerowsOf(cell, range("表格2[Chain Blanks]")).Value2
+samerowsOf(cell, range("表格2[Buffer]")).Value2 = samerowsOf(cell, range("表格2[Buffer]")).Value2
+samerowsOf(cell, range("表格2[Dependency]")).Value2 = samerowsOf(cell, range("表格2[Dependency]")).Value2
+samerowsOf(cell, range("表格2[Start Date]")).Value2 = samerowsOf(cell, range("表格2[Start Date]")).Value2
+samerowsOf(cell, range("表格2[End Date]")).Value2 = samerowsOf(cell, range("表格2[End Date]")).Value2
+samerowsOf(cell, range("表格2[Start Time]")).Value2 = samerowsOf(cell, range("表格2[Start Time]")).Value2
+samerowsOf(cell, range("表格2[End Time]")).Value2 = samerowsOf(cell, range("表格2[End Time]")).Value2
+
+
+
+End Sub
 Sub FitDuration()
 
-'    Dim fromC As String
-'    Dim toC As String
-'
-'    For Each cell In Selection
-'        If fromC = "" Then
-'            fromC = cell.Address
-'        Else
-'            toC = cell.Address
-'        End If
-'    Next cell
-'
-'    Dim StartDate As Double
-'    Dim Duration As Double
-'
-'    ActiveSheet.Range(toC).Select
-'    Set q = Evaluate("表格2[[#This Row], [Start Date]:[Start Date]]")
-'    q.Select
-'    StartDate = q.Value
-'
-'    ActiveSheet.Range(fromC).Select
-'    Set q = Evaluate("表格2[[#This Row], [預計耗時]:[預計耗時]]")
-'    q.Select
-'    Duration = q.Value
-'
-'    Set q = Evaluate("表格2[[#This Row], [Start Date]:[Start Date]]")
-'    q.Select
-'    q.Value = StartDate - Duration
-'
-'    Set q = Evaluate("表格2[[#This Row], [預計耗時]:[預計耗時]]")
-'    q.Select
-'    q.Value = "=[@完整耗時]"
-'
-'    Call CalculateRange2
-    
-'    Dim fromC As String
-'    Dim toC As String
-'    Dim targetC As String
-'
-'    For Each cell In Selection
-'        If fromC = "" Then
-'            fromC = cell.Address
-'        ElseIf targetC = "" Then
-'            targetC = cell.Address
-'        Else
-'            toC = cell.Address
-'        End If
-'    Next cell
     For Each cell In Selection
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row],[Start Date]:[Start Date]]")
-        r.Value = "=INDEX([End Date],MATCH([@編號]-1,[編號],0))"
-        Set r = Evaluate("表格2[[#This Row], [預計耗時]:[預計耗時]]")
-        r.Value = "=INDEX([Start Date],ROW()-ROW(表格2)+2)-INDEX([Start Date],ROW()-ROW(表格2)+1)"
-        Set r = Evaluate("表格2[[#This Row], [實際耗時]:[實際耗時]]")
-        r.Value = "=[@預計耗時]"
-    
-        Evaluate("表格2[@]").Calculate
-        
-        Set r = Evaluate("表格2[[#This Row], [預計耗時]:[預計耗時]]")
-        r.Value2 = r.Value2
-    
+        Dim r As range
+        Set r = cell
+        Set StartDate = StructureAboveR("End Date", r)
+        Set EndDate = StructureBelowR("Start Date", r)
+        s = StartDate.address
+        f = EndDate.address
+        If (range(use_Structured(r, 4)).HasFormula) Then range(use_Structured(r, 4)).Value2 = StartDate
+        range(use_Structured(r, 2)).Value2 = EndDate.Value2 - range(use_Structured(r, 4)).Value2
     Next cell
+    Call CalculateNext(Selection(1))
 End Sub
+
 
 Sub Connect2Next()
 'If Selection.Cells.count = 2 Then
-    Dim mysel As Range
+    Dim mysel As range
     Set mysel = Selection
     Dim fromC As String
     Dim toC As String
@@ -288,7 +263,7 @@ Sub Connect2Next()
     Dim lastRow As Long
     
     For Each cell In mysel
-        lastRow = Range(use_Structured(cell, 0)).Value2
+        lastRow = range(use_Structured(cell, 0)).Value2
     Next cell
     For Each cell In mysel
         cell.Select
@@ -296,23 +271,23 @@ Sub Connect2Next()
         Set r = Evaluate("表格2[[#This Row], [編號]:[編號]]")
         r.Value2 = lastRow
         If fromC = "" Then
-            fromC = cell.Address
+            fromC = cell.address
         Else
-            toC = cell.Address
+            toC = cell.address
         End If
     Next cell
     
     Dim nextStart As Double
     Dim Duration As Double
 
-    Range(toC).Select
+    range(toC).Select
     Set r = Evaluate("表格2[[#This Row], [Start Date]:[Start Date]]")
     nextStart = r.Value
     Set r = Evaluate("表格2[[#This Row], [實際耗時]:[實際耗時]]")
     Duration = r.Value
 
 
-    Range(fromC).Select
+    range(fromC).Select
     
     Set q = Evaluate("表格2[[#This Row], [Start Date]:[Start Date]]")
     q.Value = nextStart - (TimeBetween - Duration)
@@ -322,15 +297,20 @@ Sub Connect2Next()
 'End If
 End Sub
 
-
+Sub SelectPlanRange()
+    range(range("交易!AM2")).Select
+End Sub
+Sub SelectC3Range()
+    range(range("C3")).Select
+End Sub
 Sub FillInCells()
-    Dim toMove_time As Range
-    Set toMove_time = Application.InputBox(Prompt:="toMove_time", Title:="toMove_time", Type:=8)
-    Dim availible_time As Range
-    Set availible_time = Application.InputBox(Prompt:="availible_time", Title:="availible_time", Type:=8)
-    Call ScrollToEnd
-    Dim toPut_loc As Range
-    Set toPut_loc = Application.InputBox(Prompt:="toPut_loc", Title:="toPut_loc", Type:=8)
+    Dim toMove_time As range
+    Set toMove_time = Application.InputBox(Prompt:="toMove_time", title:="toMove_time", Type:=8)
+    Dim availible_time As range
+    Set availible_time = Application.InputBox(Prompt:="availible_time", title:="availible_time", Type:=8)
+    'Call ScrollToEnd
+    Dim toPut_loc As range
+    Set toPut_loc = Application.InputBox(Prompt:="toPut_loc", title:="toPut_loc", Type:=8)
     
     
     Dim toMove_time_c As New Collection
@@ -339,23 +319,23 @@ Sub FillInCells()
     Dim toMove_startPercent_c As New Collection
     Dim toMove_endPercent_c As New Collection
     'toMove_time_arr = toMove_time.Value
-    For i = toMove_time.Cells.count To 1 Step -1
-        toMove_time_c.Add (Range(use_Structured(getItemByIndexInRange(toMove_time, i), 2)).Value2)
-        toMove_job_c.Add (Range(use_Structured(getItemByIndexInRange(toMove_time, i), 6)).Value2)
-        toMove_des_c.Add (Range(use_Structured(getItemByIndexInRange(toMove_time, i), 9)).Value2)
-        toMove_startPercent_c.Add (Range(use_Structured(getItemByIndexInRange(toMove_time, i), 7)).Value2)
-        toMove_endPercent_c.Add (Range(use_Structured(getItemByIndexInRange(toMove_time, i), 8)).Value2)
-        Debug.Print toMove_time_c.Item(toMove_time_c.count)
+    For i = toMove_time.Cells.Count To 1 Step -1
+        toMove_time_c.Add (range(use_Structured(getItemByIndexInRange(toMove_time, i), 2)).Value2)
+        toMove_job_c.Add (range(use_Structured(getItemByIndexInRange(toMove_time, i), 6)).Value2)
+        toMove_des_c.Add (range(use_Structured(getItemByIndexInRange(toMove_time, i), 9)).Value2)
+        toMove_startPercent_c.Add (range(use_Structured(getItemByIndexInRange(toMove_time, i), 7)).Value2)
+        toMove_endPercent_c.Add (range(use_Structured(getItemByIndexInRange(toMove_time, i), 8)).Value2)
+        Debug.Print toMove_time_c.Item(toMove_time_c.Count)
     Next i
     
 
     Dim availible_time_c As New Collection
     Dim availible_start_c As New Collection
     'availible_time_arr = availible_time.Value
-    For i = availible_time.Cells.count To 1 Step -1
-        availible_time_c.Add (Range(use_Structured(getItemByIndexInRange(availible_time, i), 2)).Value2)
-        availible_start_c.Add (Range(use_Structured(getItemByIndexInRange(availible_time, i), 4)).Value2)
-        Range(use_Structured(getItemByIndexInRange(availible_time, i), 2)).Value2 = 0
+    For i = availible_time.Cells.Count To 1 Step -1
+        availible_time_c.Add (range(use_Structured(getItemByIndexInRange(availible_time, i), 2)).Value2)
+        availible_start_c.Add (range(use_Structured(getItemByIndexInRange(availible_time, i), 4)).Value2)
+        range(use_Structured(getItemByIndexInRange(availible_time, i), 2)).Value2 = 0
     Next i
     
 
@@ -379,8 +359,8 @@ Sub FillInCells()
     
     
     Dim adjustedstartPercent
-    If toMove_startPercent_c.count > 0 Then adjustedstartPercent = lastCol(toMove_startPercent_c)
-    Do While (toMove_job_c.count > 0) And (availible_time_c.count > 0)
+    If toMove_startPercent_c.Count > 0 Then adjustedstartPercent = lastCol(toMove_startPercent_c)
+    Do While (toMove_job_c.Count > 0) And (availible_time_c.Count > 0)
         If lastCol(toMove_time_c) < lastCol(availible_time_c) Then
             toPut_job_c.Add (lastCol(toMove_job_c))
             toPut_des_c.Add (lastCol(toMove_des_c))
@@ -391,19 +371,19 @@ Sub FillInCells()
 '            Call UpdateCol(availible_time_c, availible_time_c(1) - toMove_time_c(1), 1)
 '            Call UpdateCol(availible_start_c, availible_start_c(1) + toMove_time_c(1), 1)
             remainingAvailible = lastCol(availible_time_c) - lastCol(toMove_time_c)
-            availible_time_c.Remove (availible_time_c.count)
+            availible_time_c.Remove (availible_time_c.Count)
             availible_time_c.Add (remainingAvailible)
             adjustedStart = lastCol(availible_start_c) + lastCol(toMove_time_c)
-            availible_start_c.Remove (availible_start_c.count)
+            availible_start_c.Remove (availible_start_c.Count)
             availible_start_c.Add (adjustedStart)
 '            Set availible_time_c.Item(1) = availible_time_c(1) - toMove_time_c(1)
 '            Set availible_start_c.Item(1) = availible_start_c(1) + toMove_time_c(1)
-            toMove_time_c.Remove (toMove_time_c.count)
-            toMove_job_c.Remove (toMove_job_c.count)
-            toMove_des_c.Remove (toMove_des_c.count)
-            toMove_startPercent_c.Remove (toMove_startPercent_c.count)
-            toMove_endPercent_c.Remove (toMove_endPercent_c.count)
-            If toMove_startPercent_c.count > 0 Then adjustedstartPercent = lastCol(toMove_startPercent_c)
+            toMove_time_c.Remove (toMove_time_c.Count)
+            toMove_job_c.Remove (toMove_job_c.Count)
+            toMove_des_c.Remove (toMove_des_c.Count)
+            toMove_startPercent_c.Remove (toMove_startPercent_c.Count)
+            toMove_endPercent_c.Remove (toMove_endPercent_c.Count)
+            If toMove_startPercent_c.Count > 0 Then adjustedstartPercent = lastCol(toMove_startPercent_c)
         ElseIf lastCol(toMove_time_c) = lastCol(availible_time_c) Then
             toPut_job_c.Add (lastCol(toMove_job_c))
             toPut_des_c.Add (lastCol(toMove_des_c))
@@ -411,14 +391,14 @@ Sub FillInCells()
             toPut_time_c.Add (lastCol(toMove_time_c))
             toPut_startPercent_c.Add (adjustedstartPercent)
             toPut_endPercent_c.Add (lastCol(toMove_endPercent_c))
-            availible_start_c.Remove (availible_start_c.count)
-            availible_time_c.Remove (availible_time_c.count)
-            toMove_time_c.Remove (toMove_time_c.count)
-            toMove_job_c.Remove (toMove_job_c.count)
-            toMove_des_c.Remove (toMove_des_c.count)
-            toMove_startPercent_c.Remove (toMove_startPercent_c.count)
-            toMove_endPercent_c.Remove (toMove_endPercent_c.count)
-            If toMove_startPercent_c.count > 0 Then adjustedstartPercent = lastCol(toMove_startPercent_c)
+            availible_start_c.Remove (availible_start_c.Count)
+            availible_time_c.Remove (availible_time_c.Count)
+            toMove_time_c.Remove (toMove_time_c.Count)
+            toMove_job_c.Remove (toMove_job_c.Count)
+            toMove_des_c.Remove (toMove_des_c.Count)
+            toMove_startPercent_c.Remove (toMove_startPercent_c.Count)
+            toMove_endPercent_c.Remove (toMove_endPercent_c.Count)
+            If toMove_startPercent_c.Count > 0 Then adjustedstartPercent = lastCol(toMove_startPercent_c)
         Else
             toPut_job_c.Add (lastCol(toMove_job_c))
             toPut_des_c.Add (lastCol(toMove_des_c))
@@ -432,37 +412,37 @@ Sub FillInCells()
 '           Call UpdateCol(toMove_time_c, 1, toMove_time_c(1) - availible_time_c(1))
             'Set toMove_time_c.Item(1) = toMove_time_c(1) - availible_time_c(1)
             adjustedtoMovetime = lastCol(toMove_time_c) - lastCol(availible_time_c)
-            toMove_time_c.Remove (toMove_time_c.count)
+            toMove_time_c.Remove (toMove_time_c.Count)
             toMove_time_c.Add (adjustedtoMovetime)
             
-            availible_start_c.Remove (availible_start_c.count)
-            availible_time_c.Remove (availible_time_c.count)
+            availible_start_c.Remove (availible_start_c.Count)
+            availible_time_c.Remove (availible_time_c.Count)
         End If
         Debug.Print "xx"
         Debug.Print lastCol(toPut_startPercent_c)
         'Debug.Print "xxxxxx"
         'Debug.Print (CStr(toPut_job_c(toPut_job_c.count)) & " " & CStr(toPut_start_c(toPut_start_c.count)) & " " & CStr(toPut_time_c(toPut_time_c.count)))
-        If Not ((toMove_job_c.count > 0) And (availible_time_c.count > 0)) Then
+        If Not ((toMove_job_c.Count > 0) And (availible_time_c.Count > 0)) Then
             Exit Do
         End If
     Loop
-    If availible_time_c.count > 0 Then
-        For i = availible_time_c.count To 1 Step -1
+    If availible_time_c.Count > 0 Then
+        For i = availible_time_c.Count To 1 Step -1
             toPut_time_c.Add (availible_time_c(i))
             toPut_start_c.Add (availible_start_c(i))
             toPut_job_c.Add ("時序專案(288)")
             toPut_des_c.Add ("")
         Next i
     End If
-    For i = toPut_job_c.count To 1 Step -1
-        Range(use_Structured(toPut_loc.offset(i - 1), 2)).Value2 = toPut_time_c(i)
-        Range(use_Structured(toPut_loc.offset(i - 1), 4)).Value2 = toPut_start_c(i)
-        Range(use_Structured(toPut_loc.offset(i - 1), 6)).Value2 = toPut_job_c(i)
-        Range(use_Structured(toPut_loc.offset(i - 1), 9)).Value2 = toPut_des_c(i)
+    For i = toPut_job_c.Count To 1 Step -1
+        range(use_Structured(toPut_loc.offset(i - 1), 2)).Value2 = toPut_time_c(i)
+        range(use_Structured(toPut_loc.offset(i - 1), 4)).Value2 = toPut_start_c(i)
+        range(use_Structured(toPut_loc.offset(i - 1), 6)).Value2 = toPut_job_c(i)
+        range(use_Structured(toPut_loc.offset(i - 1), 9)).Value2 = toPut_des_c(i)
         On Error Resume Next
-        Range(use_Structured(toPut_loc.offset(i - 1), 7)).Value2 = toPut_startPercent_c(i)
+        range(use_Structured(toPut_loc.offset(i - 1), 7)).Value2 = toPut_startPercent_c(i)
         On Error Resume Next
-        Range(use_Structured(toPut_loc.offset(i - 1), 8)).Value2 = toPut_endPercent_c(i)
+        range(use_Structured(toPut_loc.offset(i - 1), 8)).Value2 = toPut_endPercent_c(i)
     Next i
     'Set availible = Application.InputBox(Prompt:="availible", Title:="availible", Type:=8)
     'Set toPut = Application.InputBox(Prompt:="toPut", Title:="toPut", Type:=8)
@@ -474,28 +454,20 @@ Sub FillInCells()
     'select toPut
 
 End Sub
-Public Function lastCol(c As Collection) As Variant
-    lastCol = c.Item(c.count)
+Public Function lastCol(C As Collection) As Variant
+    lastCol = C.Item(C.Count)
 End Function
-Sub test()
-    Dim mysel As Range
-    Set mysel = Selection
-    For Each cell In Selection
-        cell.Select
-        MsgBox cell.Value
-    Next cell
-    'Range(Evaluate("ADDRESS(ROW(表格2),COLUMN(表格2))")).Select
-   ' MsgBox Range(Evaluate("Cell(""address"",表格2[[#This Row], [實際百分比]:[實際百分比]])")).Column
-End Sub
-
-Sub pasteExample(icell As Range)
-    Dim sel As Range
-    Dim selectedC As Range
-    For i = 1 To icell.Cells.count
+Function FirstExample() As range
+    Set FirstExample = range("表格2[交易物件]").Find(What:="_Example", LookIn:=xlValues)
+End Function
+Sub pasteExample(icell As range)
+    Dim sel As range
+    Dim selectedC As range
+    For i = 1 To icell.Cells.Count
         Set selectedC = icell.Cells(i)
-        Set sel = Range(use_Structured(selectedC, 0)) '.Resize(1, Range("表格2").Columns.count)
-        Debug.Print AddressEx(Range("表格2").Cells(1).Resize(1, Range("表格2").Columns.count))
-        Range("表格2").offset(1, 0).Resize(1, Range("表格2").Columns.count).Copy
+        Set sel = range(use_Structured(selectedC, 0)) '.Resize(1, Range("表格2").Columns.count)
+        Debug.Print AddressEx(range("表格2").Cells(1).Resize(1, range("表格2").Columns.Count))
+        range("表格2").offset(1, 0).Resize(1, range("表格2").Columns.Count).Copy
         sel.PasteSpecial Paste:=xlPasteFormulas
         sel.Value2 = 10000
     Next i
@@ -505,19 +477,19 @@ Sub pasteExampl2e()
     Call pasteExample(Selection)
 End Sub
 Sub Consolidate()
-    Dim sel As Range
+    Dim sel As range
     Set sel = Selection
-    Dim selectedC As Range
-    Dim selectedC2 As Range
-    For i = 1 To sel.Cells.count - 1
+    Dim selectedC As range
+    Dim selectedC2 As range
+    For i = 1 To sel.Cells.Count - 1
         Set selectedC = sel.Cells(i)
         Set selectedC2 = sel.Cells(i + 1)
-        If (Range(use_Structured(selectedC, 6)).Value = Range(use_Structured(selectedC2, 6)).Value) And _
-            (Range(use_Structured(selectedC, 9)).Value = Range(use_Structured(selectedC2, 9)).Value) And _
-            (Range(use_Structured(selectedC, 5)).Value = Range(use_Structured(selectedC2, 4)).Value) Then
-            Range(use_Structured(selectedC2, 2)).Value2 = Range(use_Structured(selectedC2, 2)).Value2 + Range(use_Structured(selectedC, 2)).Value2
-            Range(use_Structured(selectedC2, 4)).Value2 = Range(use_Structured(selectedC, 4)).Value2
-            Range(use_Structured(selectedC2, 7)).Value2 = Range(use_Structured(selectedC, 7)).Value2
+        If (range(use_Structured(selectedC, 6)).Value = range(use_Structured(selectedC2, 6)).Value) And _
+            (range(use_Structured(selectedC, 9)).Value = range(use_Structured(selectedC2, 9)).Value) And _
+            (range(use_Structured(selectedC, 5)).Value = range(use_Structured(selectedC2, 4)).Value) Then
+            range(use_Structured(selectedC2, 2)).Value2 = range(use_Structured(selectedC2, 2)).Value2 + range(use_Structured(selectedC, 2)).Value2
+            range(use_Structured(selectedC2, 4)).Value2 = range(use_Structured(selectedC, 4)).Value2
+            range(use_Structured(selectedC2, 7)).Value2 = range(use_Structured(selectedC, 7)).Value2
             Call pasteExample(selectedC)
             
         End If
@@ -526,59 +498,6 @@ Sub Consolidate()
     Next i
     Call SortRowNum
 End Sub
-
-Sub test2()
-    MsgBox use_Structured(Range("$A$5"), 1)
-End Sub
-
-Function use_Structured(cell As Variant, mode As Integer)
-    If mode = 0 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [編號]:[編號]]")
-        use_Structured = r.Address
-    ElseIf mode = 1 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [完整耗時]:[完整耗時]]")
-        use_Structured = r.Address
-    ElseIf mode = 2 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [預計耗時]:[預計耗時]]")
-        use_Structured = r.Address
-    ElseIf mode = 3 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [實際耗時]:[實際耗時]]")
-        use_Structured = r.Address
-    ElseIf mode = 4 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [Start Date]:[Start Date]]")
-        use_Structured = r.Address
-    ElseIf mode = 5 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [End Date]:[End Date]]")
-        use_Structured = r.Address
-    ElseIf mode = 6 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [交易物件]:[交易物件]]")
-        use_Structured = r.Address
-    ElseIf mode = 7 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [起始百分比]:[起始百分比]]")
-        use_Structured = r.Address
-    ElseIf mode = 8 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [預計百分比]:[預計百分比]]")
-        use_Structured = r.Address
-    ElseIf mode = 9 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [Description]:[Description]]")
-        use_Structured = r.Address
-    ElseIf mode = 10 Then
-        cell.Select
-        Set r = Evaluate("表格2[[#This Row], [ID]:[ID]]")
-        use_Structured = r.Address
-    End If
-End Function
-
 
 Sub SortDate()
 Call generateID
@@ -590,12 +509,12 @@ Dim ws As Worksheet
 Set ws = ActiveSheet
 Dim tbl As ListObject
 Set tbl = ws.ListObjects("表格2")
-Dim sortcolumn As Range
-Set sortcolumn = Range("表格2[Start Date]")
+Dim sortcolumn As range
+Set sortcolumn = range("表格2[Start Date]")
 With tbl.Sort
    .SortFields.Clear
    .SortFields.Add key:=sortcolumn, SortOn:=xlSortOnValues, Order:=xlAscending
-   .Header = xlYes
+   .header = xlYes
    .Apply
 End With
 
@@ -603,11 +522,11 @@ Set r = Evaluate("表格2[編號]")
 r.Calculate
 
 Set tbl = ws.ListObjects("表格2")
-Set sortcolumn = Range("表格2[編號]")
+Set sortcolumn = range("表格2[編號]")
 With tbl.Sort
    .SortFields.Clear
    .SortFields.Add key:=sortcolumn, SortOn:=xlSortOnValues, Order:=xlAscending
-   .Header = xlYes
+   .header = xlYes
    .Apply
 End With
 
@@ -615,37 +534,32 @@ Call CalculateRange1
 
 Set r = Evaluate("表格2[編號]")
 Evaluate("表格2[編號]").Value2 = "=INDIRECT(ADDRESS(ROW()-1,COLUMN()))+1"
-Range("$A$4").Value2 = 1
+range("$A$4").Value2 = 1
 Set r = Evaluate("表格2[編號]")
 r.Calculate
 
 
-
-Dim finStr As String
-finStr = evals("=" + Replace(Range("$V$2").Value2, "rownum", targetID))
-Range(finStr).Select
-ActiveWindow.ScrollRow = Selection.Row
-ActiveWindow.ScrollColumn = Selection.Column
+Call MoveToCurrentRow
     
 End Sub
 
 
 Sub SortRowNum()
-Call generateID
+Call ClearId
 Application.CutCopyMode = False
-Dim targetID As String
-targetID = Evaluate("表格2[[#This Row], [ID]:[ID]]").Value2
+'Dim targetID As String
+'targetID = Range(use_Structured(Selection, 10)).Value2 'Evaluate("表格2[[#This Row], [ID]:[ID]]").Value2
 
 
 Dim ws As Worksheet
 Set ws = ActiveSheet
 Dim tbl As ListObject
 Set tbl = ws.ListObjects("表格2")
-Set sortcolumn = Range("表格2[編號]")
+Set sortcolumn = range("表格2[編號]")
 With tbl.Sort
    .SortFields.Clear
    .SortFields.Add key:=sortcolumn, SortOn:=xlSortOnValues, Order:=xlAscending
-   .Header = xlYes
+   .header = xlYes
    .Apply
 End With
 
@@ -653,62 +567,64 @@ End With
 
 Set r = Evaluate("表格2[編號]")
 Evaluate("表格2[編號]").Value2 = "=INDIRECT(ADDRESS(ROW()-1,COLUMN()))+1"
-Range("$A$4").Value2 = 1
+range("$A$4").Value2 = 1
 Set r = Evaluate("表格2[編號]")
 r.Calculate
 
 Call CalculateRange1
 
-Dim finStr As String
-finStr = evals("=" + Replace(Range("$V$2").Value2, "rownum", targetID))
-Range(finStr).Select
+'Dim finStr As String
+'finStr = evals("=" + Replace(Range("$V$2").Value2, "rownum", targetID))
+'Range(finStr).Select
+
+Call generateID
 ActiveWindow.ScrollRow = Selection.Row
 ActiveWindow.ScrollColumn = Selection.Column
     
 End Sub
 
 Sub SortRowNumBySel()
-    Dim mselection As Range
+    Dim mselection As range
 
     Set mselection = Selection
     fromCell = use_Structured(mselection.Cells(1), 0)
     toCell = use_Structured(mselection.Cells(2), 0)
-    Range(fromCell).Value2 = Range(toCell).Value2
+    range(fromCell).Value2 = range(toCell).Value2
     Call SortRowNum
 End Sub
 
 Sub FillPercent()
-    totaltime = 0
+    totalTime = 0
     lastPercent = 0
     Set mselection = Selection
     For Each cell In mselection
-        totaltime = totaltime + Range(use_Structured(cell, 2)).Value2
-        lastPercent = Range(use_Structured(cell, 8)).Value2
+        totalTime = totalTime + range(use_Structured(cell, 2)).Value2
+        lastPercent = range(use_Structured(cell, 8)).Value2
     Next cell
     
-    prevPercent = Range(use_Structured(mselection(1), 7)).Value2
-    firstPercent = Range(use_Structured(mselection(1), 7)).Value2
+    prevPercent = range(use_Structured(mselection(1), 7)).Value2
+    firstPercent = range(use_Structured(mselection(1), 7)).Value2
     For Each cell In mselection
-        Delta = (lastPercent - firstPercent) * (Range(use_Structured(cell, 2)).Value2 / totaltime)
-        Range(use_Structured(cell, 8)).Value2 = prevPercent + Delta
-        prevPercent = Range(use_Structured(cell, 8)).Value2
+        Delta = (lastPercent - firstPercent) * (range(use_Structured(cell, 2)).Value2 / totalTime)
+        range(use_Structured(cell, 8)).Value2 = prevPercent + Delta
+        prevPercent = range(use_Structured(cell, 8)).Value2
     Next cell
     
 End Sub
 
 
 Sub SwapCells()
-    Dim selected As Range
+    Dim selected As range
     Set selected = Selection
-    If selected.Areas.count > 1 Then
-        Dim row1 As Range
-        Dim row2 As Range
+    If selected.Areas.Count > 1 Then
+        Dim row1 As range
+        Dim row2 As range
         Set row1 = selected.Areas(1)
         Set row2 = selected.Areas(2)
-        For i = 1 To row1.Cells.count
-            tmpval = row1.Cells(i).Formula
-            row1.Cells(i).Formula = row2.Cells(i).Formula
-            row2.Cells(i).Formula = tmpval
+        For i = 1 To row1.Cells.Count
+            tmpval = row1.Cells(i).formula
+            row1.Cells(i).formula = row2.Cells(i).formula
+            row2.Cells(i).formula = tmpval
         Next i
         
     

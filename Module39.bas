@@ -1,10 +1,10 @@
 Attribute VB_Name = "Module39"
-Public Function DINDIRECT(sName As String) As Range
-     Dim nName As Name
+Public Function DINDIRECT(sName As String) As range
+     Dim nName As name
 
      On Error Resume Next
-          Set nName = ActiveWorkbook.Names(sName)
-          Set nName = ActiveSheet.Names(sName)
+          Set nName = ActiveWorkbook.names(sName)
+          Set nName = ActiveSheet.names(sName)
      On Error GoTo 0
 
      If Not nName Is Nothing Then

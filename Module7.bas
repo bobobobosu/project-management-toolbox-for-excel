@@ -9,7 +9,7 @@ End Function
 
 
 Function GetSUMIN2(target As Variant, fromTime As Double, toTime As Double, PercentOfTime As Double, TimeSeries As Variant, DataSeries As Variant, CycleMode As Integer, Limit As Integer) As Double
-    If TimeSeries.Cells(TimeSeries.Cells.count).Value2 < fromTime Or TimeSeries.Cells(1).Value2 > toTime Then
+    If TimeSeries.Cells(TimeSeries.Cells.Count).Value2 < fromTime Or TimeSeries.Cells(1).Value2 > toTime Then
         GetSUMIN2 = (toTime - fromTime) * 60 * 24 * 100
         Exit Function
     End If
@@ -137,7 +137,7 @@ Function GetESTTIME2(target As Variant, fromTime As Double, Percent As Double, T
     Dim culmTime As Double
     culmTime = 0
      
-    Dim startTime As Double
+    Dim StartTime As Double
         
     If CycleMode = 0 Then
         startData = LinearInterpolate(TimeSeries, DataSeries, fromTime)
@@ -146,19 +146,19 @@ Function GetESTTIME2(target As Variant, fromTime As Double, Percent As Double, T
         Exit Function
     ElseIf CycleMode = 1 Then
         '日循環
-        startTime = fromTime - Int(fromTime)
-        startData = LinearInterpolate(TimeSeries, DataSeries, startTime)
+        StartTime = fromTime - Int(fromTime)
+        startData = LinearInterpolate(TimeSeries, DataSeries, StartTime)
         Do While targetLimit > 0
             If targetLimit < DataSeries_arr(UBound(DataSeries_arr), 1) - startData Then
-                currEndTime = currEndTime + (LinearInterpolate(DataSeries, TimeSeries, startData + targetLimit) - startTime)
+                currEndTime = currEndTime + (LinearInterpolate(DataSeries, TimeSeries, startData + targetLimit) - StartTime)
                 targetLimit = 0
             Else
-                currEndTime = currEndTime + TimeSeries_arr(UBound(TimeSeries_arr), 1) - startTime
+                currEndTime = currEndTime + TimeSeries_arr(UBound(TimeSeries_arr), 1) - StartTime
                 'targetLimit = targetLimit - (DataSeries_arr(UBound(DataSeries_arr), 1) - LinearInterpolate(TimeSeries, DataSeries, startTime))
-                OneDay = (DataSeries_arr(UBound(DataSeries_arr), 1) - LinearInterpolate(TimeSeries, DataSeries, startTime))
+                OneDay = (DataSeries_arr(UBound(DataSeries_arr), 1) - LinearInterpolate(TimeSeries, DataSeries, StartTime))
                 If OneDay <= 0 Then Exit Do
                 targetLimit = targetLimit - OneDay
-                startTime = TimeSeries_arr(LBound(TimeSeries_arr), 1)
+                StartTime = TimeSeries_arr(LBound(TimeSeries_arr), 1)
                 startData = DataSeries_arr(LBound(DataSeries_arr), 1)
                 
                 Debug.Print targetLimit
@@ -168,18 +168,18 @@ Function GetESTTIME2(target As Variant, fromTime As Double, Percent As Double, T
         Exit Function
     ElseIf CycleMode = 2 Then
         '年循環
-        startTime = Year(toTime) - Year(fromTime)
+        StartTime = Year(toTime) - Year(fromTime)
         startData = LinearInterpolate(TimeSeries, DataSeries, DateSerial(Year(TimeSeries(1, 1)), Month(fromTime), Day(fromTime)))
         Do While targetLimit > 0
             If targetLimit < DataSeries_arr(UBound(DataSeries_arr), 1) - startData Then
-                currEndTime = currEndTime + (LinearInterpolate(DataSeries, TimeSeries, startData + targetLimit) - startTime)
+                currEndTime = currEndTime + (LinearInterpolate(DataSeries, TimeSeries, startData + targetLimit) - StartTime)
                 targetLimit = 0
             Else
-                currEndTime = currEndTime + TimeSeries_arr(UBound(TimeSeries_arr), 1) - startTime
-                OneYear = (DataSeries_arr(UBound(DataSeries_arr), 1) - LinearInterpolate(TimeSeries, DataSeries, startTime))
+                currEndTime = currEndTime + TimeSeries_arr(UBound(TimeSeries_arr), 1) - StartTime
+                OneYear = (DataSeries_arr(UBound(DataSeries_arr), 1) - LinearInterpolate(TimeSeries, DataSeries, StartTime))
                 If OneYear <= 0 Then Exit Do
                 targetLimit = targetLimit - OneYear
-                startTime = TimeSeries_arr(LBound(TimeSeries_arr), 1)
+                StartTime = TimeSeries_arr(LBound(TimeSeries_arr), 1)
                 startData = DataSeries_arr(LBound(DataSeries_arr), 1)
             End If
         Loop
@@ -231,18 +231,18 @@ Function Smaller(num1 As Double, num2 As Double)
 End Function
 
 
-Function Bigger(num1 As Double, num2 As Double)
+Function bigger(num1 As Double, num2 As Double)
         If num1 > num2 Then
             'Debug.Print num2
-            Bigger = num1
+            bigger = num1
         ElseIf num2 > num1 Then
-            Bigger = num2
+            bigger = num2
         Else
-            Bigger = num1
+            bigger = num1
         End If
 End Function
 Function BiggerThanOneSetZero(num As Double)
-    If num < 1 Then
+    If num < 0.999 Then
         BiggerThanOneSetZero = num
     Else
         BiggerThanOneSetZero = 0

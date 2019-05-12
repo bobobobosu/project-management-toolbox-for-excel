@@ -1,6 +1,6 @@
 Attribute VB_Name = "Module25"
 Function getActiveCellAdd() As String
-    getActiveCellAdd = ActiveCell.Address
+    getActiveCellAdd = ActiveCell.address
 End Function
 
 

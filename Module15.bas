@@ -53,7 +53,7 @@ Public Function distVincenty(ByVal lat1 As Double, ByVal lon1 As Double, _
   Dim sinAlpha As Double
   Dim cosSqAlpha As Double
   Dim cos2SigmaM As Double
-  Dim c As Double
+  Dim C As Double
   Dim uSq As Double
   Dim upper_A As Double
   Dim upper_B As Double
@@ -134,7 +134,7 @@ Public Function distVincenty(ByVal lat1 As Double, ByVal lon1 As Double, _
       cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha
     End If
 
-    c = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha))
+    C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha))
     lambdaP = lambda
 
 'the original calculation is "Too Complex" for Excel VBA to deal with
@@ -145,9 +145,9 @@ Public Function distVincenty(ByVal lat1 As Double, ByVal lon1 As Double, _
   (-1 + 2 * (cos2SigmaM ^ 2))))
       'calculate portions
     P1 = -1 + 2 * (cos2SigmaM ^ 2)
-    P2 = (sigma + c * sinSigma * (cos2SigmaM + c * cosSigma * P1))
+    P2 = (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * P1))
     'complete the calculation
-    lambda = L + (1 - c) * f * sinAlpha * P2
+    lambda = L + (1 - C) * f * sinAlpha * P2
 
   Wend
 
